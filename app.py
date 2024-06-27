@@ -1,10 +1,16 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, session, redirect, url_for, request, flash, render_template
 from flask_sqlalchemy import SQLAlchemy
-
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime, timedelta
+import re
+import os
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///bookshop.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
+app.config['SECRET_KEY'] = os.urandom(24)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
+app.config['SESSION_COOKIE_SECURE'] = True
 db= SQLAlchemy(app)
 
 class User(db.Model):
@@ -15,7 +21,7 @@ class User(db.Model):
     Email = db.Column(db.String(100), unique=True, nullable=False)
     PasswordHash = db.Column(db.String(100), nullable=False)
     Phone = db.Column(db.String(20), nullable=True)
-    RegistrationDate = db.Column(db.DateTime, nullable=False)
+    RegistrationDate = db.Column(db.DateTime, nullable=False,default=datetime.utcnow)
 class Addresses(db.Model):
     __tablename__ = 'addresses'
     AddressID = db.Column(db.Integer, primary_key=True)
@@ -117,13 +123,64 @@ def contactus():
 def about():
     return render_template('about.html')
 
-@app.route('/login')
+@app.route('/login', methods=['POST','GET'])
 def login():
+    if request.method=='POST':
+        email = request.form['email']
+        password = request.form['password']
+        # print(name,password)
+        user= User.query.filter_by(Email=email).first()
+        if user and  check_password_hash(user.PasswordHash, password):
+            session['user_id'] = user.UserID
+            flash('Login successful!', 'success')
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Invalid email or password', 'danger')
+    # print(allusers)
     return render_template('login.html')
 
-@app.route('/signin')
+@app.route('/signin', methods=['GET','POST'])
 def signin():
-    return render_template('signin.html')
+    if request.method=='POST':
+        first_name = request.form['firstName']
+        last_name = request.form['lastName']
+        email = request.form['email']
+        password = request.form['password']
+        phone = request.form['phone']
+        email_pattern = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
+        if not email_pattern.match(email):
+            flash('Invalid email address', 'danger')
+            return redirect(url_for('signup'))
+        password_hash = generate_password_hash(password)
+        new_user = User(
+            FirstName=first_name,
+            LastName=last_name,
+            Email=email,
+            PasswordHash=password_hash,
+            Phone=phone
+        )
 
+        db.session.add(new_user)
+        db.session.commit()
+        
+        flash('Account created successfully!', 'success')
+        session['user_id']=new_user.UserID
+        return redirect(url_for('dashboard'))
+    # allusers= Signin.query.all()
+    # return render_template('signin.html', allusers=allusers)
+    return render_template('signin.html')
+@app.route('/dashboard')
+def dashboard():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    user = User.query.get(session['user_id'])
+    return f'Welcome, {user.FirstName}!'
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    flash('You have been logged out.', 'success')
+    return redirect(url_for('login'))
 if __name__ == '__main__':
     app.run(debug=True)
