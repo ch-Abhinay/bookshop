@@ -1,7 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for,flash,session
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime , timezone
+import os
 
 app = Flask(__name__)
+
+app.config['SECRET_KEY'] = os.urandom(24)
 
 app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///bookshop.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
@@ -15,7 +19,7 @@ class User(db.Model):
     Email = db.Column(db.String(100), unique=True, nullable=False)
     PasswordHash = db.Column(db.String(100), nullable=False)
     Phone = db.Column(db.String(20), nullable=True)
-    RegistrationDate = db.Column(db.DateTime, nullable=False)
+    RegistrationDate = db.Column(db.DateTime, nullable=False,default = datetime.now(timezone.utc))
 class Addresses(db.Model):
     __tablename__ = 'addresses'
     AddressID = db.Column(db.Integer, primary_key=True)
@@ -117,13 +121,53 @@ def contactus():
 def about():
     return render_template('about.html')
 
-@app.route('/login')
+@app.route('/login',methods = ['GET','POST'])
 def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        user = User.query.filter_by(Email=email).first()
+        if user and user.PasswordHash == password:
+            session['user_id'] = user.UserID
+            flash('Login successful!', 'success')
+            return redirect('/')  
+        else:
+            flash('Invalid email or password.', 'danger')
     return render_template('login.html')
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)  
+    flash('You have been logged out.', 'success')
+    return redirect('/login')
 
-@app.route('/signin')
+@app.route('/signin',methods = ['GET','POST'])
 def signin():
+    if request.method == 'POST':
+        fname = request.form['fname']
+        lname = request.form['lname']
+        pno = request.form['pno']
+        emailid = request.form['emailid']
+        passw = request.form['passw']
+        sign = User(FirstName = fname,LastName = lname,Email = emailid,PasswordHash = passw,Phone = pno )
+        db.session.add(sign)
+        db.session.commit()
+        session['user_id'] = sign.UserID
+        flash('Sign up successful!', 'success')
+        return redirect('/')  
     return render_template('signin.html')
 
 if __name__ == '__main__':
+    #with app.app_context():
+    #    product1 = Products(ProductName='Gilead', Description='Desc-1',Price = 299,StockQuantity = 10,CategoryID = 2)
+    #    product2 = Products(ProductName='Spiders Web', Description="Desc-2",Price = 399,StockQuantity = 8,CategoryID = 2)
+    #    product3 = Products(ProductName='The one tree', Description='Desc-3',Price = 150,StockQuantity = 10,CategoryID = 2)
+    #    product4 = Products(ProductName='The Four Loves', Description='Desc-4',Price = 299,StockQuantity = 10,CategoryID = 2)
+#    product1 = Products(ProductName='Gilead', Description='A NOVEL THAT READERS and critics have been eagerly anticipating for over a decade, Gilead is an astonishingly imagined story of remarkable lives. John Ames is a preacher, the son of a preacher and the grandson (both maternal and paternal) of preachers. It’s 1956 in Gilead, Iowa, towards the end of the Reverend Ames’s life, and he is absorbed in recording his family’s story, a legacy for the young son he will never see grow up. Haunted by his grandfather’s presence, John tells of the rift between his grandfather and his father: the elder, an angry visionary who fought for the abolitionist cause, and his son, an ardent pacifist. He is troubled, too, by his prodigal namesake, Jack (John Ames) Boughton, his best friend’s lost son who returns to Gilead searching for forgiveness and redemption. Told in John Ames’s joyous, rambling voice that finds beauty, humour and truth in the smallest of life’s details, Gilead is a song of celebration and acceptance of the best and the worst the world has to offer. At its heart is a tale of the sacred bonds between fathers and sons, pitch-perfect in style and story, set to dazzle critics and readers alike.',Price = 299,StockQuantity = 10,)
+
+    #    db.session.add(product1)
+    #    db.session.add(product2)
+    #    db.session.add(product3)
+    #    db.session.add(product4)
+    #    db.session.commit()
+    
     app.run(debug=True)
