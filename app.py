@@ -1,14 +1,16 @@
-from flask import Flask, render_template, request, redirect, url_for,flash,session
+from flask import Flask, session, redirect, url_for, request, flash, render_template
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime , timezone
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime, timedelta
+import re
 import os
-
 app = Flask(__name__)
-
-app.config['SECRET_KEY'] = os.urandom(24)
 
 app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///bookshop.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
+app.config['SECRET_KEY'] = os.urandom(24)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
+app.config['SESSION_COOKIE_SECURE'] = True
 db= SQLAlchemy(app)
 
 class User(db.Model):
@@ -19,7 +21,10 @@ class User(db.Model):
     Email = db.Column(db.String(100), unique=True, nullable=False)
     PasswordHash = db.Column(db.String(100), nullable=False)
     Phone = db.Column(db.String(20), nullable=True)
-    RegistrationDate = db.Column(db.DateTime, nullable=False,default = datetime.now(timezone.utc))
+    RegistrationDate = db.Column(db.DateTime, nullable=False,default=datetime.utcnow)
+    UserType = db.Column(db.String(20), nullable=False, default='customer')
+    GSTPanNumber = db.Column(db.String(20), nullable=True) 
+    Products = db.relationship('Products', backref='merchant', lazy=True)
 class Addresses(db.Model):
     __tablename__ = 'addresses'
     AddressID = db.Column(db.Integer, primary_key=True)
@@ -38,6 +43,7 @@ class Products(db.Model):
     Price= db.Column(db.Integer, nullable=False)
     StockQuantity= db.Column(db.Integer,nullable=False)
     CategoryID= db.Column(db.Integer,db.ForeignKey('categories.CategoryID'), nullable=False )
+    MerchantID = db.Column(db.Integer, db.ForeignKey('users.UserID'), nullable=False) 
 
 class Categories(db.Model):
     __tablename__='categories'
@@ -111,7 +117,8 @@ def home():
 
 @app.route('/books', methods=['POST','GET'])
 def books():
-    return render_template('books.html')
+    books = Products.query.all()
+    return render_template('books.html', books = books)
 
 @app.route('/contactus')
 def contactus():
@@ -121,53 +128,115 @@ def contactus():
 def about():
     return render_template('about.html')
 
-@app.route('/login',methods = ['GET','POST'])
+@app.route('/login', methods=['POST','GET'])
 def login():
-    if request.method == 'POST':
+    if request.method=='POST':
         email = request.form['email']
         password = request.form['password']
-        user = User.query.filter_by(Email=email).first()
-        if user and user.PasswordHash == password:
+        # print(name,password)
+        user= User.query.filter_by(Email=email).first()
+        if user and  check_password_hash(user.PasswordHash, password):
             session['user_id'] = user.UserID
             flash('Login successful!', 'success')
-            return redirect('/')  
+            if user.UserType == 'merchant':
+                return redirect(url_for('merchant_dashboard'))
+            return redirect(url_for('dashboard'))
         else:
-            flash('Invalid email or password.', 'danger')
+            flash('Invalid email or password', 'danger')
+    # print(allusers)
     return render_template('login.html')
+
+@app.route('/signin', methods=['GET','POST'])
+def signin():
+    if request.method=='POST':
+        first_name = request.form['firstName']
+        last_name = request.form['lastName']
+        email = request.form['email']
+        password = request.form['password']
+        phone = request.form['phone']
+        email_pattern = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
+        if not email_pattern.match(email):
+            flash('Invalid email address', 'danger')
+            return redirect(url_for('signup'))
+        password_hash = generate_password_hash(password)
+        new_user = User(
+            FirstName=first_name,
+            LastName=last_name,
+            Email=email,
+            PasswordHash=password_hash,
+            Phone=phone
+        )
+
+        db.session.add(new_user)
+        db.session.commit()
+        
+        flash('Account created successfully!', 'success')
+        session['user_id']=new_user.UserID
+        return redirect(url_for('dashboard'))
+    # allusers= Signin.query.all()
+    # return render_template('signin.html', allusers=allusers)
+    return render_template('signin.html')
+@app.route('/dashboard')
+def dashboard():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    user = User.query.get(session['user_id'])
+    return f'Welcome, {user.FirstName}!'
+
 @app.route('/logout')
 def logout():
-    session.pop('user_id', None)  
+    session.pop('user_id', None)
     flash('You have been logged out.', 'success')
-    return redirect('/login')
+    return redirect(url_for('login'))
 
-@app.route('/signin',methods = ['GET','POST'])
-def signin():
-    if request.method == 'POST':
-        fname = request.form['fname']
-        lname = request.form['lname']
-        pno = request.form['pno']
-        emailid = request.form['emailid']
-        passw = request.form['passw']
-        sign = User(FirstName = fname,LastName = lname,Email = emailid,PasswordHash = passw,Phone = pno )
-        db.session.add(sign)
+@app.route('/signin1',methods = ['POST','GET'])
+def signin1():
+    if request.method=='POST':
+        first_name = request.form['firstName']
+        last_name = request.form['lastName']
+        gst_number = request.form['gstnum']
+        email = request.form['email']
+        password = request.form['password']
+        phone = request.form['phone']
+        email_pattern = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
+        if not email_pattern.match(email):
+            flash('Invalid email address', 'danger')
+            return redirect(url_for('signup'))
+        password_hash = generate_password_hash(password)
+        new_user = User(
+            FirstName=first_name,
+            LastName=last_name,
+            Email=email,
+            PasswordHash=password_hash,
+            Phone=phone,
+            UserType = 'merchant',
+            GSTPanNumber = gst_number
+        )
+
+        db.session.add(new_user)
         db.session.commit()
-        session['user_id'] = sign.UserID
-        flash('Sign up successful!', 'success')
-        return redirect('/')  
-    return render_template('signin.html')
+        
+        flash('Account created successfully!', 'success')
+        session['user_id']=new_user.UserID
+        return redirect(url_for('merchant_dashboard'))
+    return render_template('signin1.html')
+
+@app.route('/merchant_dashboard',methods = ['POST','GET'])
+def merchant_dashboard():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    if request.method == "POST":
+        bookname = request.form['bookname']
+        bookdesc = request.form['bookdesc']
+        bookprice = request.form['bookprice']
+        stockamount = request.form['stockamount']
+        categoryid = request.form['categoryid']
+        #Pending 
+    
+    user = User.query.get(session['user_id'])
+    return render_template('merchant_dash.html')
 
 if __name__ == '__main__':
-    #with app.app_context():
-    #    product1 = Products(ProductName='Gilead', Description='Desc-1',Price = 299,StockQuantity = 10,CategoryID = 2)
-    #    product2 = Products(ProductName='Spiders Web', Description="Desc-2",Price = 399,StockQuantity = 8,CategoryID = 2)
-    #    product3 = Products(ProductName='The one tree', Description='Desc-3',Price = 150,StockQuantity = 10,CategoryID = 2)
-    #    product4 = Products(ProductName='The Four Loves', Description='Desc-4',Price = 299,StockQuantity = 10,CategoryID = 2)
-#    product1 = Products(ProductName='Gilead', Description='A NOVEL THAT READERS and critics have been eagerly anticipating for over a decade, Gilead is an astonishingly imagined story of remarkable lives. John Ames is a preacher, the son of a preacher and the grandson (both maternal and paternal) of preachers. It’s 1956 in Gilead, Iowa, towards the end of the Reverend Ames’s life, and he is absorbed in recording his family’s story, a legacy for the young son he will never see grow up. Haunted by his grandfather’s presence, John tells of the rift between his grandfather and his father: the elder, an angry visionary who fought for the abolitionist cause, and his son, an ardent pacifist. He is troubled, too, by his prodigal namesake, Jack (John Ames) Boughton, his best friend’s lost son who returns to Gilead searching for forgiveness and redemption. Told in John Ames’s joyous, rambling voice that finds beauty, humour and truth in the smallest of life’s details, Gilead is a song of celebration and acceptance of the best and the worst the world has to offer. At its heart is a tale of the sacred bonds between fathers and sons, pitch-perfect in style and story, set to dazzle critics and readers alike.',Price = 299,StockQuantity = 10,)
 
-    #    db.session.add(product1)
-    #    db.session.add(product2)
-    #    db.session.add(product3)
-    #    db.session.add(product4)
-    #    db.session.commit()
-    
     app.run(debug=True)
