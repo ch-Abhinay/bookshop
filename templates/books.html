@@ -1,5 +1,24 @@
 {% extends 'base.html' %}
 {% block body %}
 <div class="container">
-    <h1 style="padding: 100px;">this is books section</h1></div>
+    <h1>this is books section</h1>
+</div>
+<div class="card mb-4">
+    <div class="row g-0">
+        {% for book in books %}
+        <div class="col-md-4">
+            <img src="product-image1.jpg" class="img-fluid rounded-start" alt="Product Image 1">
+        </div>
+        <div class="col-md-8">
+
+            <div class="card-body ">
+                <h5 class="card-title">{{book.ProductName}}</h5>
+                <p class="card-text">{{book.Description}}</p>
+                <p class="card-text"><strong>{{book.Price}}</strong></p>
+                <a href="#" class="btn btn-primary">Buy Now</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock body %}

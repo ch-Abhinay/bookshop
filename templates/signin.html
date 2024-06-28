@@ -1,42 +1,37 @@
 {% extends 'base.html' %}
 {% block body %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <h2 class="text-center">Sign Up</h2>
-            <form action="/signin" method="POST">
-                <div class="mb-3">
-                    <label for="firstname" class="form-label">First Name</label>
-                    <input type="text" class="form-control" id="firstname" name = "fname" placeholder="Enter your first name"
-                        aria-describedby="emailHelp">
-        
+    <h1> This is signin page</h1>
+    <div class="container" id="signup" style="max-width: 655px; margin: auto; padding: 50px;">
+        <div class="container" id="login" style="max-width: 655px; margin: auto; padding: 50px;">
+            <div class="card" style="max-width: 500px; width: 100%;">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Sign Up</h5>
+                    <form action="/signin" method="post">
+                        <div class="sm">
+                            <label for="firstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="firstName" name="firstName" required>
+                        </div>
+                        <div class="sm">
+                            <label for="lastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="lastName" name="lastName" required>
+                        </div>
+                        <div class="sm">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="sm">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <div class="sm">
+                            <label for="phone" class="form-label">Phone (optional)</label>
+                            <input type="text" class="form-control" id="phone" name="phone">
+                        </div>
+                        <button type="submit" class="btn btn-primary my-3">Sign Up</button>
+                        <p>Already have an account? <a href="/login">Login</a></p>
+                    </form>
                 </div>
-                <div class="mb-3">
-                    <label for="lastname" class="form-label">Last Name</label>
-                    <input type="text" class="form-control" id="lastname" name = "lname" placeholder="Enter your last name"
-                        aria-describedby="emailHelp">
-        
-                </div>
-                <div class="mb-3">
-                    <label for="phonenumber" class="form-label">Mobile Number</label>
-                    <input type="number" class="form-control" id="phonenumber" name = "pno" placeholder="Enter your Mobile number"
-                        aria-describedby="emailHelp">
-        
-                </div>
-                <div class="mb-3">
-                    <label for="exampleInputEmail1" class="form-label">Email address</label>
-                    <input type="email" class="form-control" id="exampleInputEmail1" name = "emailid" placeholder="Enter your Email id"
-                        aria-describedby="emailHelp">
-        
-                </div>
-                <div class="mb-3">
-                    <label for="exampleInputPassword1" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="exampleInputPassword1" name = "passw" placeholder="Enter your Password">
-                </div>
-        
-                <button type="submit" class="btn btn-primary">Sign Up</button>
-            </form>
+            </div>
         </div>
-    </div>    
-</div>
+    </div>
 {% endblock body %}
