@@ -183,13 +183,31 @@ def dashboard():
         return redirect(url_for('login'))
 
     user = User.query.get(session['user_id'])
-    return f'Welcome, {user.FirstName}!'
+    return render_template('dashboard.html', user=user)
 
 @app.route('/logout')
 def logout():
     session.pop('user_id', None)
     flash('You have been logged out.', 'success')
     return redirect(url_for('login'))
+    
+@app.route('/login1', methods=['POST','GET'])
+def login1():
+    if request.method=='POST':
+        email = request.form['email']
+        password = request.form['password']
+        # print(name,password)
+        user= User.query.filter_by(Email=email).first()
+        if user and  check_password_hash(user.PasswordHash, password):
+            session['user_id'] = user.UserID
+            flash('Login successful!', 'success')
+            if user.UserType == 'merchant':
+                return redirect(url_for('merchant_dashboard'))
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Invalid email or password', 'danger')
+    # print(allusers)
+    return render_template('login1.html')
 
 @app.route('/signin1',methods = ['POST','GET'])
 def signin1():
