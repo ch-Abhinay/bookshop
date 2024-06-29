@@ -1,4 +1,5 @@
 from flask import Flask, session, redirect, url_for, request, flash, render_template
+from flask import Flask, session, redirect, url_for, request, flash, render_template
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
@@ -21,7 +22,7 @@ class User(db.Model):
     Email = db.Column(db.String(100), unique=True, nullable=False)
     PasswordHash = db.Column(db.String(100), nullable=False)
     Phone = db.Column(db.String(20), nullable=True)
-    RegistrationDate = db.Column(db.DateTime, nullable=False,default=datetime.utcnow)
+    RegistrationDate = db.Column(db.DateTime, nullable=False)
 class Addresses(db.Model):
     __tablename__ = 'addresses'
     AddressID = db.Column(db.Integer, primary_key=True)
@@ -40,6 +41,7 @@ class Products(db.Model):
     Price= db.Column(db.Integer, nullable=False)
     StockQuantity= db.Column(db.Integer,nullable=False)
     CategoryID= db.Column(db.Integer,db.ForeignKey('categories.CategoryID'), nullable=False )
+    MerchantID = db.Column(db.Integer, db.ForeignKey('users.UserID'), nullable=False) 
 
 class Categories(db.Model):
     __tablename__='categories'
@@ -113,7 +115,8 @@ def home():
 
 @app.route('/books', methods=['POST','GET'])
 def books():
-    return render_template('books.html')
+    books = Products.query.all()
+    return render_template('books.html', books = books)
 
 @app.route('/contactus')
 def contactus():
@@ -125,18 +128,6 @@ def about():
 
 @app.route('/login', methods=['POST','GET'])
 def login():
-    if request.method=='POST':
-        email = request.form['email']
-        password = request.form['password']
-        # print(name,password)
-        user= User.query.filter_by(Email=email).first()
-        if user and  check_password_hash(user.PasswordHash, password):
-            session['user_id'] = user.UserID
-            flash('Login successful!', 'success')
-            return redirect(url_for('dashboard'))
-        else:
-            flash('Invalid email or password', 'danger')
-    # print(allusers)
     return render_template('login.html')
 
 @app.route('/signin', methods=['GET','POST'])
@@ -169,18 +160,7 @@ def signin():
     # allusers= Signin.query.all()
     # return render_template('signin.html', allusers=allusers)
     return render_template('signin.html')
-@app.route('/dashboard')
-def dashboard():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    
-    user = User.query.get(session['user_id'])
-    return f'Welcome, {user.FirstName}!'
 
-@app.route('/logout')
-def logout():
-    session.pop('user_id', None)
-    flash('You have been logged out.', 'success')
-    return redirect(url_for('login'))
 if __name__ == '__main__':
+
     app.run(debug=True)

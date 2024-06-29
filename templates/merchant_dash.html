@@ -1,0 +1,30 @@
+{% include 'base.html' %}
+{% block body %}
+<div class="container">
+    <form method="post" action="/merchant_dashboard">
+        <div class="mb-3">
+          <label for="bookname" class="form-label">Book Name</label>
+          <input type="email" class="form-control" name = "bookname"id="bookname" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <label for="bookdesc" class="form-label">Book Description</label>
+          <input type="password" class="form-control" name = "bookdesc" id="bookdesc">
+        </div>
+        <div class="mb-3">
+            <label for="bookprice" class="form-label">Book Price</label>
+            <input type="password" class="form-control" name = "bookprice" id="bookprice">
+          </div>
+          <div class="mb-3">
+            <label for="stockamount" class="form-label">Stock Quantity</label>
+            <input type="password" class="form-control" name = "stockamount" id="stockamount">
+          </div>
+          <div class="mb-3">
+            <label for="categoryid" class="form-label">Genre</label>
+            <input type="password" class="form-control" name = "categoryid" id="categoryid">
+          </div>
+        
+        <button type="submit" class="btn btn-primary">Upload</button>
+      </form>
+</div>
+
+{% endblock body %}
