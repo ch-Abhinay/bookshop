@@ -223,20 +223,34 @@ def signin1():
         return redirect(url_for('merchant_dashboard'))
     return render_template('signin1.html')
 
-@app.route('/merchant_dashboard',methods = ['POST','GET'])
+@app.route('/merchant_dashboard')
 def merchant_dashboard():
     if 'user_id' not in session:
         return redirect(url_for('login'))
+    user = User.query.get(session['user_id'])
+    products = Products.query.filter_by(MerchantID=user.UserID).all()
+    return render_template('merchant_dash.html',products = products)
+
+@app.route('/merchant_dashboard/add_book',methods = ['POST','GET'])
+def add_book():
     if request.method == "POST":
         bookname = request.form['bookname']
         bookdesc = request.form['bookdesc']
         bookprice = request.form['bookprice']
         stockamount = request.form['stockamount']
         categoryid = request.form['categoryid']
-        #Pending 
+        product = Products(
+            ProductName = bookname,
+            Description = bookdesc,
+            Price = bookprice,
+            StockQuantity = stockamount,
+            CategoryID = categoryid,
+            MerchantID = session.get('user_id')
+            )
+        db.session.add(product)
+        db.session.commit()
+    return render_template('add_book.html')
 
-    user = User.query.get(session['user_id'])
-    return render_template('merchant_dash.html')
 if __name__ == '__main__':
 
     app.run(debug=True)
