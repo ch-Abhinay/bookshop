@@ -22,7 +22,10 @@ class User(db.Model):
     Email = db.Column(db.String(100), unique=True, nullable=False)
     PasswordHash = db.Column(db.String(100), nullable=False)
     Phone = db.Column(db.String(20), nullable=True)
-    RegistrationDate = db.Column(db.DateTime, nullable=False)
+    RegistrationDate = db.Column(db.DateTime, nullable=False, default=datetime.utcnow )
+    UserType = db.Column(db.String(20), nullable=False, default='customer')
+    GSTPanNumber = db.Column(db.String(20), nullable=True) 
+    Products = db.relationship('Products', backref='merchant', lazy=True)
 class Addresses(db.Model):
     __tablename__ = 'addresses'
     AddressID = db.Column(db.Integer, primary_key=True)
@@ -128,8 +131,22 @@ def about():
 
 @app.route('/login', methods=['POST','GET'])
 def login():
+    if request.method=='POST':
+        email = request.form['email']
+        password = request.form['password']
+        # print(name,password)
+        user= User.query.filter_by(Email=email).first()
+        if user and  check_password_hash(user.PasswordHash, password):
+            session['user_id'] = user.UserID
+            flash('Login successful!', 'success')
+            if user.UserType == 'merchant':
+                return redirect(url_for('merchant_dashboard'))
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Invalid email or password', 'danger')
+    # print(allusers)
     return render_template('login.html')
-
+ 
 @app.route('/signin', methods=['GET','POST'])
 def signin():
     if request.method=='POST':
@@ -160,7 +177,66 @@ def signin():
     # allusers= Signin.query.all()
     # return render_template('signin.html', allusers=allusers)
     return render_template('signin.html')
+@app.route('/dashboard')
+def dashboard():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
 
+    user = User.query.get(session['user_id'])
+    return f'Welcome, {user.FirstName}!'
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    flash('You have been logged out.', 'success')
+    return redirect(url_for('login'))
+
+@app.route('/signin1',methods = ['POST','GET'])
+def signin1():
+    if request.method=='POST':
+        first_name = request.form['firstName']
+        last_name = request.form['lastName']
+        gst_number = request.form['gstnum']
+        email = request.form['email']
+        password = request.form['password']
+        phone = request.form['phone']
+        email_pattern = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
+        if not email_pattern.match(email):
+            flash('Invalid email address', 'danger')
+            return redirect(url_for('signup'))
+        password_hash = generate_password_hash(password)
+        new_user = User(
+            FirstName=first_name,
+            LastName=last_name,
+            Email=email,
+            PasswordHash=password_hash,
+            Phone=phone,
+            UserType = 'merchant',
+            GSTPanNumber = gst_number
+        )
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash('Account created successfully!', 'success')
+        session['user_id']=new_user.UserID
+        return redirect(url_for('merchant_dashboard'))
+    return render_template('signin1.html')
+
+@app.route('/merchant_dashboard',methods = ['POST','GET'])
+def merchant_dashboard():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    if request.method == "POST":
+        bookname = request.form['bookname']
+        bookdesc = request.form['bookdesc']
+        bookprice = request.form['bookprice']
+        stockamount = request.form['stockamount']
+        categoryid = request.form['categoryid']
+        #Pending 
+
+    user = User.query.get(session['user_id'])
+    return render_template('merchant_dash.html')
 if __name__ == '__main__':
 
     app.run(debug=True)
