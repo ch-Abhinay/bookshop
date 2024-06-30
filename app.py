@@ -57,13 +57,14 @@ class Carts(db.Model):
     CartID= db.Column(db.Integer, primary_key=True)
     UserID= db.Column(db.Integer,db.ForeignKey('users.UserID'), nullable=False)
     CreatedDate= db.Column(db.DateTime, nullable=False)
-
+    items = db.relationship('CartItems', backref='cart', lazy=True)
 class CartItems(db.Model):
     __tablename__='cartitems'
     CartItemID= db.Column(db.Integer, primary_key=True)
     CartID= db.Column(db.Integer,db.ForeignKey('carts.CartID'), nullable=False)
     ProductID= db.Column(db.Integer,db.ForeignKey('products.ProductID'), nullable=False)
     Quantity= db.Column(db.Integer, nullable=False)
+    product = db.relationship('Products', backref=db.backref('cart_items', lazy=True))
 
 class Orders(db.Model):
     __tablename__='orders'
@@ -140,7 +141,7 @@ def login():
             session['user_id'] = user.UserID
             flash('Login successful!', 'success')
             if user.UserType == 'merchant':
-                return redirect(url_for('merchant_dashboard'))
+                return redirect(url_for('dashboard'))
             return redirect(url_for('dashboard'))
         else:
             flash('Invalid email or password', 'danger')
@@ -181,9 +182,10 @@ def signin():
 def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-
+        
     user = User.query.get(session['user_id'])
-    return render_template('dashboard.html', user=user)
+    products = Products.query.filter_by(MerchantID=user.UserID).all()
+    return render_template('dashboard.html', user=user, products= products)
 
 @app.route('/logout')
 def logout():
@@ -202,7 +204,7 @@ def login1():
             session['user_id'] = user.UserID
             flash('Login successful!', 'success')
             if user.UserType == 'merchant':
-                return redirect(url_for('merchant_dashboard'))
+                return redirect(url_for('dashboard'))
             return redirect(url_for('dashboard'))
         else:
             flash('Invalid email or password', 'danger')
@@ -238,18 +240,18 @@ def signin1():
 
         flash('Account created successfully!', 'success')
         session['user_id']=new_user.UserID
-        return redirect(url_for('merchant_dashboard'))
+        return redirect(url_for('dashboard'))
     return render_template('signin1.html')
 
-@app.route('/merchant_dashboard')
-def merchant_dashboard():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    user = User.query.get(session['user_id'])
-    products = Products.query.filter_by(MerchantID=user.UserID).all()
-    return render_template('merchant_dash.html',products = products)
+# @app.route('/merchant_dashboard')
+# def merchant_dashboard():
+#     if 'user_id' not in session:
+#         return redirect(url_for('login'))
+#     user = User.query.get(session['user_id'])
+#     products = Products.query.filter_by(MerchantID=user.UserID).all()
+#     return render_template('merchant_dash.html',products = products)
 
-@app.route('/merchant_dashboard/add_book',methods = ['POST','GET'])
+@app.route('/dashboard/add_book',methods = ['POST','GET'])
 def add_book():
     if request.method == "POST":
         bookname = request.form['bookname']
@@ -279,6 +281,44 @@ def search():
             results = []
         return render_template('search_results.html', results=results)
     
+@app.route('/add_to_cart/<int:product_id>', methods=['POST'])
+def add_to_cart(product_id):
+    if 'user_id' not in session:
+        flash('please log in first')
+        return redirect(url_for('login'))
+    quantity= int(request.form['quantity'])
+    user_id= session['user_id']
+    cart= Carts.query.filter_by(UserID=user_id).first()
+    if not cart:
+        cart = Carts(UserID=user_id, CreatedDate=datetime.utcnow())
+        db.session.add(cart)
+        db.session.commit()
+    cart_item= CartItems.query.filter_by(CartID=cart.CartID, ProductID=product_id).first()
+    if cart_item:
+        cart_item.Quantity += quantity
+    else:
+        cart_item = CartItems(CartID=cart.CartID, ProductID=product_id,Quantity=quantity)
+        db.session.add(cart_item)
+    db.session.commit()
+    flash('item added to card successfully!', 'success')
+    return redirect(url_for('books'))
+
+@app.route('/mycart')
+def mycart():
+    if 'user_id' not in session:
+        flash('Please log in first!', 'danger')
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    cart = Carts.query.filter_by(UserID=user_id).first()
+    if not cart:
+        flash('Your cart is empty!', 'info')
+        return render_template('cart.html', cart_items=[])
+
+    cart_items = CartItems.query.filter_by(CartID=cart.CartID).all()
+    return render_template('cart.html', cart_items=cart_items)
+
+
 if __name__ == '__main__':
 
     app.run(debug=True)

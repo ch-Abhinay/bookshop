@@ -4,6 +4,39 @@
     <div class="card-body">
         <h5 class="card-title">Dashboard</h5>
         <p>Welcome, {{ user.FirstName }}!</p>
+        {% if user.UserType =='merchant' %}
+        <div class="container mt-5">
+            <h3>Merchant Dashboard</h3>
+            <div class="row">
+              <div class="col-md-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Add a Book</h5>
+                    <a href="/merchant_dashboard/add_book" class="btn btn-primary">Add Book</a>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">My books</h5>
+                    <div class="dropdown">
+                      <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        My Books
+                      </button>
+                      <ul class="dropdown-menu">
+                        {% for product in products %}
+                        <li><a class="dropdown-item" href="#">{{ product.ProductName }}</a></li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
     </div>
 </div>
 {% endblock body %}

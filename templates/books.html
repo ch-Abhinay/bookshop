@@ -3,8 +3,10 @@
 <div class="container">
     <h1>this is books section</h1>
 </div>
-<div class="card mb-4">
-    {% for book in books %}
+<!-- <div class="card mb-4"> -->
+{% for book in books %}
+<div class="card mb-4 my-3 rounded ">
+
 
     <div class="row g-0">
         <div class="col-md-4">
@@ -16,11 +18,16 @@
                 <h5 class="card-title">{{book.ProductName}}</h5>
                 <p class="card-text">{{book.Description}}</p>
                 <p class="card-text"><strong>{{book.Price}}</strong></p>
-                <a href="#" class="btn btn-primary">Buy Now</a>
+                <form method="POST" action="{{ url_for('add_to_cart', product_id=book.ProductID) }}">
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit" class="btn btn-primary my-2">Add to Cart</button>
+                </form>
+                <a href="#" class="btn btn-primary my-2">Buy Now</a>
             </div>
         </div>
     </div>
+</div>
     {% endfor %}
 
-</div>
+
 {% endblock body %}
