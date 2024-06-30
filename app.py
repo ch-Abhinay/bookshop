@@ -269,6 +269,22 @@ def add_book():
         db.session.commit()
     return render_template('add_book.html')
 
+@app.route('/search',methods = ['GET','POST'])
+def search():
+    if request.method == 'GET':
+        query = request.args.get('query')
+        if query:
+            results = Products.query.filter(Products.ProductName.ilike(f'{query}%')).all()
+        else:
+            results = []
+        return render_template('search_results.html', results=results)
+    
+
+@app.route('/product_page/<int:product_id>')
+def product_page(product_id):
+    product = Products.query.get_or_404(product_id)
+    return render_template('product_page.html', product=product)
+
 if __name__ == '__main__':
 
     app.run(debug=True)
