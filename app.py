@@ -178,6 +178,7 @@ def signin():
     # allusers= Signin.query.all()
     # return render_template('signin.html', allusers=allusers)
     return render_template('signin.html')
+
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
@@ -186,6 +187,43 @@ def dashboard():
     user = User.query.get(session['user_id'])
     products = Products.query.filter_by(MerchantID=user.UserID).all()
     return render_template('dashboard.html', user=user, products= products)
+
+@app.route('/dashboard/my_books')
+def my_books():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+        
+    user = User.query.get(session['user_id'])
+    products = Products.query.filter_by(MerchantID=user.UserID).all()
+    return render_template('my_books.html', products= products)
+
+@app.route('/remove/<int:product_id>', methods=['POST'])
+def remove_product(product_id):
+    product = Products.query.get(product_id) 
+    if product:
+        db.session.delete(product)
+        db.session.commit()
+    return redirect('/dashboard/my_books')
+
+@app.route('/update/<int:product_id>',methods = ['GET','POST'])
+def update(product_id):
+    if request.method == "POST":
+        bookname = request.form['name']
+        bookdesc = request.form['desc']
+        bookprice = request.form['price']
+        stockamount = request.form['amount']
+        categoryid = request.form['category']
+        product = Products.query.filter_by(ProductID = product_id).first()
+        product.ProductName = bookname
+        product.Description = bookdesc
+        product.Price = bookprice
+        product.StockQuantity = stockamount
+        product.CategoryID = categoryid
+        db.session.add(product)
+        db.session.commit()
+        return redirect('/dashboard/my_books')
+    product = Products.query.filter_by(ProductID = product_id).first()
+    return render_template('update_book.html',product = product)
 
 @app.route('/logout')
 def logout():
