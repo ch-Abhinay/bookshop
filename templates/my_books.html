@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block body %}
+<div class="container">
+    <h1>Your Books</h1>
+</div>
+{% if products %}
+{% for product in products %}
+<div class="card mb-4 my-3 rounded ">
+    <div class="row g-0">
+        <div class="col-md-4">
+            <img src="product-image1.jpg" class="img-fluid rounded-start" alt="Product Image 1">
+        </div>
+        <div class="col-md-8">
+            <div class="card-body ">
+                <h5 class="card-title">{{product.ProductName}}</h5>
+                <p class="card-text">{{product.Description}}</p>
+                <p class="card-text"><strong>{{product.Price}}</strong></p>
+                <form action="/remove/{{ product.ProductID }}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-danger">Remove</button>
+                </form>
+                <a href="/update/{{product.ProductID}}" class="btn btn-primary">Update</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+<div class="container">
+    <a href="/dashboard/add_book" class="btn btn-primary">Add Book</a>
+</div>
+{% else %}
+<p>No books</p>
+{% endif %}
+
+{% endblock body %}

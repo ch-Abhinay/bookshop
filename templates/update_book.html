@@ -1,0 +1,30 @@
+{% include 'base.html' %}
+{% block body %}
+<div class="container">
+    <h3>Update your details</h3>
+    <form method="post" action="/update/{{product.ProductID}}">
+        <div class="mb-3">
+          <label for="name" class="form-label">Book Name</label>
+          <input type="text" class="form-control" name = "name" value = "{{product.ProductName}}" id="bookname">
+        </div>
+        <div class="mb-3">
+          <label for="desc" class="form-label">Book Description</label>
+          <input type="text" class="form-control" name = "desc" value = "{{product.Description}}" id="bookdesc">
+        </div>
+        <div class="mb-3">
+            <label for="price" class="form-label">Book Price</label>
+            <input type="number" class="form-control" name = "price" value = "{{product.Price}}" id="bookprice">
+          </div>
+          <div class="mb-3">
+            <label for="amount" class="form-label">Stock Quantity</label>
+            <input type="number" class="form-control" name = "amount" value = "{{product.StockQuantity}}" id="stockamount">
+          </div>
+          <div class="mb-3">
+            <label for="category" class="form-label">Genre</label>
+            <input type="number" class="form-control" name = "category" value = "{{product.CategoryID}}" id="categoryid">
+          </div>
+        
+        <button type="submit" class="btn btn-primary">Update</button>
+      </form>
+</div>
+{% endblock body %}
