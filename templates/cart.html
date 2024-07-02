@@ -17,8 +17,9 @@
                 <p class="card-text"><strong>{{ item.product.Price }}</strong></p>
                 <p class="card-text"><strong>Quantity: {{ item.Quantity }}</strong></p>
                 <form action="{{ url_for('update_cart_item', item_id=item.CartItemID) }}" method="post" class="d-inline">
-                    <input type="number" name="quantity" value="{{ item.Quantity }}" min="1" class="form-control d-inline-block" style="width: 80px;">
-                    <button type="submit" class="btn btn-warning">Update</button>
+                    <label for="quantity">
+                    <input type="number" name="quantity" value="{{ item.Quantity }}" min="1" class="form-control d-inline-block">
+                    <button type="submit" class="btn btn-warning">Update</button></label>
                 </form>
                 <form action="{{ url_for('delete_cart_item', item_id=item.CartItemID) }}" method="post" class="d-inline">
                     <button type="submit" class="btn btn-danger">Delete</button>

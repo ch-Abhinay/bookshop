@@ -18,6 +18,7 @@
                             <button type="submit" class="btn btn-danger">Remove</button>
                         </form>
                         <form action="{{ url_for('add_to_cart', product_id=item.product.ProductID) }}" method="post" class="d-inline">
+                            <input type="hidden" name="quantity" value="1">
                              <a href="/mycart"><button type="submit" class="btn btn-primary">Add to Cart</button></a>
                         </form>
                     </div>

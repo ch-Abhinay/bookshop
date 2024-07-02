@@ -40,7 +40,7 @@ class Products(db.Model):
     __tablename__ = 'products'
     ProductID = db.Column(db.Integer, primary_key=True)
     ProductName= db.Column(db.String(50), nullable=False)
-    
+
     Description= db.Column(db.String(100), nullable=False)
     Price= db.Column(db.Integer, nullable=False)
     StockQuantity= db.Column(db.Integer,nullable=False)
@@ -344,7 +344,7 @@ def add_to_cart(product_id):
         db.session.add(cart_item)
     db.session.commit()
     flash('item added to card successfully!', 'success')
-    return redirect(url_for('books'))
+    return redirect(url_for('mycart'))
 
 @app.route('/mycart')
 def mycart():
@@ -429,7 +429,7 @@ def add_to_wishlist(product_id):
         db.session.commit()
         flash('Item added to wishlist.', 'success')
     
-    return redirect(url_for('books'))
+    return redirect(url_for('wishlist'))
 
 @app.route('/remove_wishlist_item/<int:item_id>', methods=['POST'])
 def remove_wishlist_item(item_id):
