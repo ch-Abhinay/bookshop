@@ -14,7 +14,11 @@
                     <h5 class="card-title">{{ product.ProductName }}</h5>
                     <p class="card-text">{{ product.Description }}</p>
                     <p class="card-text"><strong>${{ product.Price }}</strong></p>
-                    <a href="#" class="btn btn-primary">Buy Now </a>
+                    <form method="POST" action="{{ url_for('add_to_cart', product_id=product.ProductID) }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="btn btn-primary my-2">Add to Cart</button>
+                    </form>
+                    <a href="#" class="btn btn-primary my-2">Buy Now </a>
                 </div>
             </div>
         </div>

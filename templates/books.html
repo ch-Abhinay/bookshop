@@ -18,11 +18,16 @@
                 <h5 class="card-title">{{book.ProductName}}</h5>
                 <p class="card-text">{{book.Description}}</p>
                 <p class="card-text"><strong>{{book.Price}}</strong></p>
+                <div style="display: flex; flex-direction: row;">
                 <form method="POST" action="{{ url_for('add_to_cart', product_id=book.ProductID) }}">
                     <input type="hidden" name="quantity" value="1">
-                    <button type="submit" class="btn btn-primary my-2">Add to Cart</button>
+                    <button type="submit" class="btn btn-primary my-2 mx-2">Add to Cart</button>
                 </form>
-                <a href="#" class="btn btn-primary my-2">Buy Now</a>
+                <form action="{{ url_for('add_to_wishlist', product_id=book.ProductID) }}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-primary my-2 mx-2">Add to Wishlist</button>
+                </form>
+                <a href="#" class="btn btn-primary my-2 mx-2">Buy Now</a>
+            </div>
             </div>
         </div>
     </div>

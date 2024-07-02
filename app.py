@@ -40,6 +40,7 @@ class Products(db.Model):
     __tablename__ = 'products'
     ProductID = db.Column(db.Integer, primary_key=True)
     ProductName= db.Column(db.String(50), nullable=False)
+    
     Description= db.Column(db.String(100), nullable=False)
     Price= db.Column(db.Integer, nullable=False)
     StockQuantity= db.Column(db.Integer,nullable=False)
@@ -105,13 +106,16 @@ class Wishlist(db.Model):
     __tablename__='wishlist'
     WishlistID= db.Column(db.Integer, primary_key=True)
     UserID= db.Column(db.Integer,db.ForeignKey('users.UserID'), nullable=False)
-    CreatedDate= db.Column(db.DateTime, nullable=False)
+    CreatedDate= db.Column(db.DateTime, nullable=False , default=datetime.utcnow)
+    items = db.relationship('WishlistItems', backref='wishlist', lazy=True)
 
 class WishlistItems(db.Model):
     __tablename__='wishlistitems'
     WishlistItemID= db.Column(db.Integer, primary_key=True)
     WishlistID= db.Column(db.Integer,db.ForeignKey('wishlist.WishlistID'), nullable=False)
     ProductID= db.Column(db.Integer,db.ForeignKey('products.ProductID'), nullable=False)
+    product = db.relationship('Products', backref=db.backref('wishlist_items', lazy=True))
+
 
 @app.route('/')
 def home():
@@ -317,6 +321,7 @@ def search():
             results = Products.query.filter(Products.ProductName.ilike(f'{query}%')).all()
         else:
             results = []
+        books = Products.query.all()
         return render_template('search_results.html', results=results)
     
 @app.route('/add_to_cart/<int:product_id>', methods=['POST'])
@@ -355,6 +360,92 @@ def mycart():
 
     cart_items = CartItems.query.filter_by(CartID=cart.CartID).all()
     return render_template('cart.html', cart_items=cart_items)
+
+@app.route('/update_cart_item/<int:item_id>', methods=['POST'])
+def update_cart_item(item_id):
+    if 'user_id' not in session:
+        flash('Please log in first!', 'danger')
+        return redirect(url_for('login'))
+    
+    new_quantity = request.form['quantity']
+    cart_item = CartItems.query.get(item_id)
+    if cart_item:
+        cart_item.Quantity = new_quantity
+        db.session.commit()
+        flash('Item updated successfully!', 'success')
+    else:
+        flash('Item not found.', 'danger')
+    return redirect(url_for('mycart'))
+
+@app.route('/delete_cart_item/<int:item_id>', methods=['POST'])
+def delete_cart_item(item_id):
+    if 'user_id' not in session:
+        flash('Please log in first!', 'danger')
+        return redirect(url_for('login'))
+    
+    cart_item = CartItems.query.get(item_id)
+    if cart_item:
+        db.session.delete(cart_item)
+        db.session.commit()
+        flash('Item removed from cart.', 'success')
+    else:
+        flash('Item not found.', 'danger')
+    return redirect(url_for('mycart'))
+
+@app.route('/wishlist')
+def wishlist():
+    if 'user_id' not in session:
+        flash('Please log in first!', 'danger')
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
+    wishlist = Wishlist.query.filter_by(UserID=user_id).first()
+    if not wishlist:
+        flash('Your wishlist is empty!', 'info')
+        return render_template('wishlist.html', wishlist_items=[])
+    
+    wishlist_items = WishlistItems.query.filter_by(WishlistID=wishlist.WishlistID).all()
+    return render_template('wishlist.html', wishlist_items=wishlist_items)
+
+@app.route('/add_to_wishlist/<int:product_id>', methods=['POST'])
+def add_to_wishlist(product_id):
+    if 'user_id' not in session:
+        flash('Please log in first!', 'danger')
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
+    wishlist = Wishlist.query.filter_by(UserID=user_id).first()
+    if not wishlist:
+        wishlist = Wishlist(UserID=user_id)
+        db.session.add(wishlist)
+        db.session.commit()
+    
+    wishlist_item = WishlistItems.query.filter_by(WishlistID=wishlist.WishlistID, ProductID=product_id).first()
+    if wishlist_item:
+        flash('Item already in wishlist.', 'info')
+    else:
+        wishlist_item = WishlistItems(WishlistID=wishlist.WishlistID, ProductID=product_id)
+        db.session.add(wishlist_item)
+        db.session.commit()
+        flash('Item added to wishlist.', 'success')
+    
+    return redirect(url_for('books'))
+
+@app.route('/remove_wishlist_item/<int:item_id>', methods=['POST'])
+def remove_wishlist_item(item_id):
+    if 'user_id' not in session:
+        flash('Please log in first!', 'danger')
+        return redirect(url_for('login'))
+    
+    wishlist_item = WishlistItems.query.get(item_id)
+    if wishlist_item:
+        db.session.delete(wishlist_item)
+        db.session.commit()
+        flash('Item removed from wishlist.', 'success')
+    else:
+        flash('Item not found in wishlist.', 'danger')
+    
+    return redirect(url_for('wishlist'))
 
 
 if __name__ == '__main__':
