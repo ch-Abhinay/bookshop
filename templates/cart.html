@@ -30,6 +30,9 @@
     </div>
 </div>
 {% endfor %}
+<div class="container mb-4">
+    <a href="{{ url_for('checkout') }}" class="btn btn-primary">Proceed to Checkout</a>
+</div>
 {% else %}
 <p>Your cart is empty.</p>
 {% endif %}

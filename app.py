@@ -447,7 +447,209 @@ def remove_wishlist_item(item_id):
     
     return redirect(url_for('wishlist'))
 
+@app.route('/checkout', methods=['GET', 'POST'])
+def checkout():
+    if 'user_id' not in session:
+        flash('Please log in first!', 'danger')
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
+    addresses = Addresses.query.filter_by(UserID=user_id).all()
+     
+    cart = Carts.query.filter_by(UserID=user_id).first()
+    cart_items = CartItems.query.filter_by(CartID=cart.CartID).all()
+
+    total_amount = sum(item.Quantity * item.product.Price for item in cart_items)
+
+    if request.method == 'POST':
+        if not addresses:
+            return redirect(url_for('add_address'))
+
+        
+        return redirect(url_for('select_payment'))
+
+    return render_template('checkout.html', addresses=addresses, cart_items=cart_items, total_amount=total_amount)
+
+@app.route('/add_address', methods=['GET', 'POST'])
+def add_address():
+    if 'user_id' not in session:
+        flash('Please log in first!', 'danger')
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
+    if request.method == 'POST':
+        street_address = request.form['street_address']
+        city = request.form['city']
+        state = request.form['state']
+        postal_code = request.form['postal_code']
+        country = request.form['country']
+
+        address = Addresses(
+            UserID=user_id,
+            StreetAddress=street_address,
+            City=city,
+            State=state,
+            PostalCode=postal_code,
+            Country=country
+        )
+        db.session.add(address)
+        db.session.commit()
+        return redirect(url_for('checkout'))
+    
+    return render_template('add_address.html')
+
+@app.route('/select_payment', methods=['GET','POST'])
+def select_payment():
+    return render_template('select_payment.html')
+
+@app.route('/process_payment', methods=['POST'])
+def process_payment():
+    payment_method = request.form['payment_method']
+    
+    if payment_method == 'online':
+        return redirect(url_for('online_payment'))
+    elif payment_method == 'cash':
+        return redirect(url_for('cash_payment'))
+    else:
+        return "Invalid payment method", 400
+
+@app.route('/cash_payment', methods=['GET', 'POST'])
+def cash_payment():
+    user_id = session['user_id']
+    
+    cart = Carts.query.filter_by(UserID=user_id).first()
+    cart_items = CartItems.query.filter_by(CartID=cart.CartID).all()
+    
+    total_amount = sum(item.Quantity * item.product.Price for item in cart_items)
+    
+    address = Addresses.query.filter_by(UserID=user_id).first()
+    shipping_address_id = address.AddressID if address else None
+    billing_address_id = address.AddressID if address else None
+    
+    order = Orders(
+        UserID=user_id,
+        OrderDate=datetime.utcnow(),
+        TotalAmount=total_amount,
+        ShippingAddressID=shipping_address_id,
+        BillingAddressID=billing_address_id,
+        OrderStatus='Completed'  
+    )
+    db.session.add(order)
+    db.session.commit()
+
+    for item in cart_items:
+        order_item = OrderItems(
+            OrderID=order.OrderID,
+            ProductID=item.ProductID,
+            Quantity=item.Quantity,
+            UnitPrice=item.product.Price
+        )
+        db.session.add(order_item)
+    db.session.commit()
+
+    payment = Payments(
+        OrderID=order.OrderID,
+        PaymentDate=datetime.utcnow(),
+        Amount=total_amount,
+        PaymentMethod='Cash'
+    )
+    db.session.add(payment)
+    db.session.commit()
+
+    for item in cart_items:
+        db.session.delete(item)
+    db.session.commit()
+
+    return redirect(url_for('order_confirmation', order_id=order.OrderID))
+
+
+@app.route('/online_payment', methods=['GET', 'POST'])
+def online_payment():
+    if 'user_id' not in session:
+        flash('Please log in first!', 'danger')
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
+    
+    if request.method == 'POST':
+        card_number = request.form['card_number']
+        expiry_date = request.form['expiry_date']
+        cvv = request.form['cvv']
+        
+        cart = Carts.query.filter_by(UserID=user_id).first()
+        cart_items = CartItems.query.filter_by(CartID=cart.CartID).all()
+        total_amount = sum(item.Quantity * item.product.Price for item in cart_items)
+        
+        address = Addresses.query.filter_by(UserID=user_id).first()
+        shipping_address_id = address.AddressID if address else None
+        billing_address_id = address.AddressID if address else None
+        
+        order = Orders(
+            UserID=user_id,
+            OrderDate=datetime.utcnow(),
+            TotalAmount=total_amount,
+            ShippingAddressID=shipping_address_id,
+            BillingAddressID=billing_address_id,
+            OrderStatus='Completed'
+        )
+        db.session.add(order)
+        db.session.commit()
+
+        for item in cart_items:
+            order_item = OrderItems(
+                OrderID=order.OrderID,
+                ProductID=item.ProductID,
+                Quantity=item.Quantity,
+                UnitPrice=item.product.Price
+            )
+            db.session.add(order_item)
+        db.session.commit()
+
+        payment = Payments(
+            OrderID=order.OrderID,
+            PaymentDate=datetime.utcnow(),
+            Amount=total_amount,
+            PaymentMethod='Online'
+        )
+        db.session.add(payment)
+        db.session.commit()
+
+        for item in cart_items:
+            db.session.delete(item)
+        db.session.commit()
+
+        return redirect(url_for('order_confirmation', order_id=order.OrderID))
+
+    return render_template('online_payment.html')
+
+@app.route('/order_confirmation/<int:order_id>')
+def order_confirmation(order_id):
+    order = Orders.query.get(order_id)
+    if not order:
+        return "Order not found", 404
+
+    order_items = OrderItems.query.filter_by(OrderID=order_id).all()
+    items_with_details = []
+    for item in order_items:
+        product = Products.query.get(item.ProductID)
+        items_with_details.append({
+            'ProductName': product.ProductName,
+            'Quantity': item.Quantity,
+            'UnitPrice': item.UnitPrice
+        })
+
+    shipping_address = Addresses.query.get(order.ShippingAddressID)
+    full_shipping_address = f"{shipping_address.StreetAddress}, {shipping_address.City}, {shipping_address.State}, {shipping_address.PostalCode}, {shipping_address.Country}"
+
+    billing_address = Addresses.query.get(order.BillingAddressID)
+    full_billing_address = f"{billing_address.StreetAddress}, {billing_address.City}, {billing_address.State}, {billing_address.PostalCode}, {billing_address.Country}"
+
+    return render_template('order_confirmation.html', order=order, items_with_details=items_with_details, full_shipping_address=full_shipping_address, full_billing_address=full_billing_address)
+
+
+
 
 if __name__ == '__main__':
+    
 
     app.run(debug=True)
