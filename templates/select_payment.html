@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block body %}
+<h1>Select Payment Method</h1>
+<div class="container">
+    <form method="POST" action = "{{ url_for('process_payment') }}">
+        <div class="container">
+            <label>
+                <input type="radio" name="payment_method" value="online" required> Online Payment
+            </label>
+        </div>
+        <div class="container">
+            <label>
+                <input type="radio" name="payment_method" value="cash" required> Cash Payment
+            </label>
+        </div>
+        <button type="submit" class="btn btn-primary">Proceed to Payment</button>
+    </form>
+</div>
+
+{% endblock body %}

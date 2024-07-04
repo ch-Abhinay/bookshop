@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block body %}
+<div class="container">
+    <h1>Order Confirmation</h1>
+    <h2>Order Details</h2>
+    <p>Order ID: {{ order.OrderID }}</p>
+    <p>Order Date: {{ order.OrderDate }}</p>
+    <p>Order Status: {{ order.OrderStatus }}</p>
+
+    <h2>Shipping Address</h2>
+    <p>{{ full_shipping_address }}</p>
+
+    <h2>Billing Address</h2>
+    <p>{{ full_billing_address }}</p>
+
+    <h2>Items</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items_with_details %}
+            <tr>
+                <td>{{ item.ProductName }}</td>
+                <td>{{ item.Quantity }}</td>
+                <td>Rs.{{ item.UnitPrice }}</td>
+                <td>Rs.{{ item.Quantity * item.UnitPrice }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Total Amount: Rs.{{ order.TotalAmount }}</h3>
+    <div class="container mb-5">
+        <a href="/" class="btn btn-primary">Go Home</a>
+    </div>
+</div>
+{% endblock body %}

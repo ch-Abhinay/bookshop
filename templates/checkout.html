@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block body %}
+<h1>Checkout Page</h1>
+{% if addresses %}
+  <h2>Invoice</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in cart_items %}
+      <tr>
+        <td>{{ item.product.ProductName }}</td>
+        <td>{{ item.Quantity }}</td>
+        <td>Rs.{{ item.product.Price }}</td>
+        <td>Rs.{{ item.Quantity * item.product.Price }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <h3>Total Amount: Rs.{{ total_amount }}</h3>
+  <form action="{{ url_for('select_payment') }}" method="post">
+    <button type="submit" class="btn btn-primary">Proceed to Payment</button>
+</form>
+
+{% else %}
+  <p>No address found. Please <a href="{{ url_for('add_address') }}">Add an address</a>.</p>
+{% endif %}
+{% endblock body %}

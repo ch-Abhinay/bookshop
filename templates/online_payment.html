@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block body %}
+<h1>Online Payment</h1>
+<div class="container">
+    <form method="POST">
+        <div class="form-group">
+            <label for="card_number">Card Number</label>
+            <input type="text" class="form-control" id="card_number" name="card_number" required>
+        </div>
+        <div class="form-group">
+            <label for="expiry_date">Expiry Date</label>
+            <input type="text" class="form-control" id="expiry_date" name="expiry_date" required>
+        </div>
+        <div class="form-group">
+            <label for="cvv">CVV</label>
+            <input type="text" class="form-control" id="cvv" name="cvv" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Pay</button>
+    </form>
+
+</div>
+
+{% endblock body %}
