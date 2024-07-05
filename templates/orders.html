@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block body %}
+<div class="container">
+    <h1>My Orders</h1>
+</div>
+{% if orders %}
+<div class="container">
+    
+    <ul class="list-group">
+        
+        {% for order in orders %}
+        <li class="list-group-item">
+            <h5>Order </h5>
+            <p>Order Date: {{ order.OrderDate.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+            <p>Total Amount: ${{ order.TotalAmount }}</p>
+            <p>Status: {{ order.OrderStatus }}</p>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% else %}
+<p>No orders found.</p>
+{% endif %}
+{% endblock body %}

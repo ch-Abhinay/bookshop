@@ -446,6 +446,16 @@ def remove_wishlist_item(item_id):
         flash('Item not found in wishlist.', 'danger')
     
     return redirect(url_for('wishlist'))
+    
+@app.route('/orders')
+def orders():
+    if 'user_id' not in session:
+        flash('Please log in first!', 'danger')
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    orders = Orders.query.filter_by(UserID=user_id).order_by(Orders.OrderDate.desc()).all()
+    return render_template('orders.html', orders=orders)
 
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
