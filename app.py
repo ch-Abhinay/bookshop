@@ -229,6 +229,25 @@ def update(product_id):
     product = Products.query.filter_by(ProductID = product_id).first()
     return render_template('update_book.html',product = product)
 
+@app.route('/dashboard/my_ratings')
+def my_ratings():
+    if 'user_id' not in session:
+        flash('Please log in first!', 'danger')
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
+    merchant_products = Products.query.filter_by(MerchantID=user_id).all()
+    product_ids = [product.ProductID for product in merchant_products]
+    
+    reviews = Reviews.query.filter(Reviews.ProductID.in_(product_ids)).all()
+    
+    # Fetch product details
+    product_details = {product.ProductID: product.ProductName for product in merchant_products}
+    
+    return render_template('my_ratings.html', reviews=reviews, product_details=product_details)
+
+
+
 @app.route('/logout')
 def logout():
     session.pop('user_id', None)
@@ -480,7 +499,7 @@ def orders():
         flash('Rating submitted successfully', 'success')
         return redirect(url_for('orders')) """
 
-@app.route('/order_items/<int:order_id>', methods=['GET', 'POST'])
+""" @app.route('/order_items/<int:order_id>', methods=['GET', 'POST'])
 def order_items(order_id):
     if 'user_id' not in session:
         flash('Please log in first!', 'danger')
@@ -512,7 +531,49 @@ def order_items(order_id):
         flash('Rating submitted successfully', 'success')
         return redirect(url_for('order_items', order_id=order_id))
 
-    return render_template('order_items.html', order=order, order_items=order_items)
+    return render_template('order_items.html', order=order, order_items=order_items) """
+
+@app.route('/order_items/<int:order_id>', methods=['GET', 'POST'])
+def order_items(order_id):
+    if 'user_id' not in session:
+        flash('Please log in first!', 'danger')
+        return redirect(url_for('login'))
+    
+    order = Orders.query.get_or_404(order_id)
+    order_items = OrderItems.query.filter_by(OrderID=order_id).all()
+
+    # Fetch product details
+    product_details = {item.ProductID: Products.query.get(item.ProductID) for item in order_items}
+
+    if request.method == 'POST':
+        item_id = request.form['item_id']
+        product_id = request.form['product_id']
+        rating = request.form.get(f'rating-{item_id}')  # Use .get() to avoid KeyError
+        comment = request.form['comment']
+
+        if rating:
+            user_id = session['user_id']
+
+            # Create a new review
+            review = Reviews(
+                ProductID=product_id,
+                UserID=user_id,
+                Rating=rating,
+                Comment=comment,
+                ReviewDate=datetime.utcnow()
+            )
+            db.session.add(review)
+            db.session.commit()
+
+            flash('Rating submitted successfully', 'success')
+        else:
+            flash('Please provide a rating.', 'danger')
+
+        return redirect(url_for('order_items', order_id=order_id))
+
+    return render_template('order_items.html', order=order, order_items=order_items, product_details=product_details)
+
+
 
 """ @app.route('/submit_rating', methods=['GET', 'POST'])
 def submit_rating():

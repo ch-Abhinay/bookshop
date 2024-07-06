@@ -10,30 +10,24 @@
     <ul class="list-group">
         {% for item in order_items %}
         <li class="list-group-item">
-            <p>Product: {{ item.ProductID }}</p>
+            <h5>Product ID : {{item.ProductID}}</h5>
+            <h5>Product: {{ product_details[item.ProductID].ProductName }}</h5>
             <p>Quantity: {{ item.Quantity }}</p>
             <p>Unit Price: ${{ item.UnitPrice }}</p>
             <p>Total Price: ${{ item.Quantity * item.UnitPrice }}</p>
-            <strong>Rate this Product : </strong>
+            <strong>Rate this Product:</strong>
             <!-- Form for Rating Submission -->
-            <form action="{{url_for('order_items', order_id=order.OrderID) }}" method="post">
+            <form action="{{ url_for('order_items', order_id=order.OrderID) }}" method="post">
                 <input type="hidden" name="item_id" value="{{ item.OrderItemID }}">
                 <input type="hidden" name="product_id" value="{{ item.ProductID }}">
 
                 <!-- Star Rating System -->
                 <div class="star-rating">
-                    <input id="star1" type="radio" name="rating" value="1">
-                    <label for="star1"><i class="bi bi-star-fill"></i></label>
-                    <input id="star2" type="radio" name="rating" value="2">
-                    <label for="star2"><i class="bi bi-star-fill"></i></label>
-                    <input id="star3" type="radio" name="rating" value="3">
-                    <label for="star3"><i class="bi bi-star-fill"></i></label>
-                    <input id="star4" type="radio" name="rating" value="4">
-                    <label for="star4"><i class="bi bi-star-fill"></i></label>
-                    <input id="star5" type="radio" name="rating" value="5">
-                    <label for="star5"><i class="bi bi-star-fill"></i></label>
+                    {% for i in range(1, 6) %}
+                    <input id="star{{ i }}-{{ item.OrderItemID }}" type="radio" name="rating-{{ item.OrderItemID }}" value="{{ i }}">
+                    <label for="star{{ i }}-{{ item.OrderItemID }}"><i class="bi bi-star-fill"></i></label>
+                    {% endfor %}
                 </div>
-
 
                 <!-- Comment Field -->
                 <div class="form-group mt-2">
@@ -56,63 +50,27 @@
         .star-rating label {
             font-size: 1em;
             color: #333;
-            /* Inactive star color */
             cursor: pointer;
         }
 
         /* Active star color */
-        /* .star-rating input[type="radio"]:checked~label,
-        .star-rating input[type="radio"]:checked~label:hover {
-            color: gold; /* Change to desired active star color 
-        } */
-        /* Active star color */
-        .star-rating input[type="radio"]:checked+label {
+        .star-rating input[type="radio"]:checked + label {
             color: gold;
-            /* Change to desired active star color */
         }
     </style>
-    <!-- <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const stars = document.querySelectorAll('.star-rating input[type="radio"]');
-            const labels = document.querySelectorAll('.star-rating label');
-
-            stars.forEach((star, index) => {
-                star.addEventListener('change', function () {
-                    resetStars();
-                    highlightStars(index);
-                });
-            });
-
-            function resetStars() {
-                labels.forEach(label => {
-                    label.classList.remove('checked');
-                });
-            }
-
-            function highlightStars(index) {
-                // Highlight stars from the first selected star to the last
-                for (let i = 0; i <= index; i++) {
-                    labels[i].classList.add('checked');
-                    console.log(i)
-                }
-            }
-        });
-    </script> -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const radios = document.querySelectorAll('.star-rating input[type="radio"]');
+            const stars = document.querySelectorAll('.star-rating input[type="radio"]');
             
-            radios.forEach(radio => {
-                radio.addEventListener('change', function () {
-                    const labels = Array.from(radio.parentNode.children).filter(child => child.tagName === 'LABEL');
-                    const index = Array.from(labels).indexOf(radio.nextElementSibling);
+            stars.forEach(star => {
+                star.addEventListener('change', function () {
+                    const starId = this.id;
+                    const itemID = starId.split('-')[1];
+                    const labels = document.querySelectorAll(`.star-rating label[for^="star"][for$="-${itemID}"]`);
                     
-                    labels.forEach((label, idx) => {
-                        if (idx <= index) {
-                            label.style.color = 'gold'; // Highlight stars up to the selected one
-                        } else {
-                            label.style.color = '#333'; // Reset color for stars after the selected one
-                        }
+                    labels.forEach(label => {
+                        const starIndex = parseInt(label.htmlFor.split('star')[1].split('-')[0]);
+                        label.style.color = (starIndex <= parseInt(this.value)) ? 'gold' : '#333';
                     });
                 });
             });
