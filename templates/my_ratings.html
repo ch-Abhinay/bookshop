@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block body %}
+<div class="container mt-5">
+    <h3>My Ratings</h3>
+    {% if reviews %}
+    <ul class="list-group">
+        {% for review in reviews %}
+        <li class="list-group-item">
+            <h5>Product ID : {{review.ProductID}}</h5>
+            <h5>Product: {{ product_details[review.ProductID] }}</h5>
+            <p>Rating: {{ review.Rating }}</p>
+            <p>Comment: {{ review.Comment }}</p>
+            <p>Review Date: {{ review.ReviewDate.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No ratings found for your products.</p>
+    {% endif %}
+    <a href="{{ url_for('dashboard') }}" class="btn btn-primary mt-3">Back to Dashboard</a>
+</div>
+{% endblock body %}
+
