@@ -14,6 +14,7 @@
             <p>Order Date: {{ order.OrderDate.strftime('%Y-%m-%d %H:%M:%S') }}</p>
             <p>Total Amount: ${{ order.TotalAmount }}</p>
             <p>Status: {{ order.OrderStatus }}</p>
+            <a href="{{ url_for('order_items', order_id=order.OrderID) }}" class="btn btn-primary">View Order Items</a>
         </li>
         {% endfor %}
     </ul>

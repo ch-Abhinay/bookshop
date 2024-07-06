@@ -457,6 +457,71 @@ def orders():
     orders = Orders.query.filter_by(UserID=user_id).order_by(Orders.OrderDate.desc()).all()
     return render_template('orders.html', orders=orders)
 
+""" if request.method == 'POST':
+        item_id = request.form['item_id']
+        product_id = request.form['product_id']
+        rating = request.form['rating']
+        comment = request.form['comment']
+
+        # Assuming you have 'user_id' in session
+        user_id = session['user_id']
+
+        # Create a new review
+        review = Reviews(
+            ProductID=product_id,
+            UserID=user_id,
+            Rating=rating,
+            Comment=comment,
+            ReviewDate=datetime.utcnow()
+        )
+        db.session.add(review)
+        db.session.commit()
+
+        flash('Rating submitted successfully', 'success')
+        return redirect(url_for('orders')) """
+
+@app.route('/order_items/<int:order_id>', methods=['GET', 'POST'])
+def order_items(order_id):
+    if 'user_id' not in session:
+        flash('Please log in first!', 'danger')
+        return redirect(url_for('login'))
+    order = Orders.query.get_or_404(order_id)
+    order_items = OrderItems.query.filter_by(OrderID=order_id).all()
+
+    
+    if request.method == 'POST':
+        item_id = request.form['item_id']
+        product_id = request.form['product_id']
+        rating = request.form['rating']
+        comment = request.form['comment']
+
+        # Assuming you have 'user_id' in session
+        user_id = session['user_id']
+
+        # Create a new review
+        review = Reviews(
+            ProductID=product_id,
+            UserID=user_id,
+            Rating=rating,
+            Comment=comment,
+            ReviewDate=datetime.utcnow()
+        )
+        db.session.add(review)
+        db.session.commit()
+
+        flash('Rating submitted successfully', 'success')
+        return redirect(url_for('order_items', order_id=order_id))
+
+    return render_template('order_items.html', order=order, order_items=order_items)
+
+""" @app.route('/submit_rating', methods=['GET', 'POST'])
+def submit_rating():
+    if 'user_id' not in session:
+        flash('Please log in first!', 'danger')
+        return redirect(url_for('login')) """
+    
+
+
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
     if 'user_id' not in session:
