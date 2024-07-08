@@ -7,7 +7,7 @@
         <div class="card mb-4 my-3 rounded">
             <div class="row g-0">
                 <div class="col-md-4">
-                    <img src="product-image1.jpg" class="img-fluid rounded-start" alt="Product Image 1">
+                    <img src="{{ url_for('static', filename='uploads/' ~ item.product.ProductImage) }}" class="img-fluid rounded-start" alt="{{ item.product.ProductName }}">
                 </div>
                 <div class="col-md-8">
                     <div class="card-body">
@@ -19,7 +19,7 @@
                         </form>
                         <form action="{{ url_for('add_to_cart', product_id=item.product.ProductID) }}" method="post" class="d-inline">
                             <input type="hidden" name="quantity" value="1">
-                             <a href="/mycart"><button type="submit" class="btn btn-primary">Add to Cart</button></a>
+                            <button type="submit" class="btn btn-primary">Add to Cart</button>
                         </form>
                     </div>
                 </div>

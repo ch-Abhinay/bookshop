@@ -1,29 +1,42 @@
-{% include 'base.html' %}
+{% extends 'base.html' %}
 {% block body %}
 <div class="container">
     <h3>Enter Details of your Book</h3>
-    <form method="post" action="/dashboard/add_book">
+    <form method="post" action="/dashboard/add_book" enctype="multipart/form-data">
         <div class="mb-3">
           <label for="bookname" class="form-label">Book Name</label>
-          <input type="text" class="form-control" name = "bookname"id="bookname" aria-describedby="emailHelp">
+          <input type="text" class="form-control" name="bookname" id="bookname" required>
+        </div>
+        <div class="mb-3">
+          <label for="author" class="form-label">Author</label>
+          <input type="text" class="form-control" name="author" id="author" required>
         </div>
         <div class="mb-3">
           <label for="bookdesc" class="form-label">Book Description</label>
-          <input type="text" class="form-control" name = "bookdesc" id="bookdesc">
+          <input type="text" class="form-control" name="bookdesc" id="bookdesc" required>
         </div>
         <div class="mb-3">
             <label for="bookprice" class="form-label">Book Price</label>
-            <input type="number" class="form-control" name = "bookprice" id="bookprice">
+            <input type="number" class="form-control" name="bookprice" id="bookprice" required>
           </div>
           <div class="mb-3">
             <label for="stockamount" class="form-label">Stock Quantity</label>
-            <input type="number" class="form-control" name = "stockamount" id="stockamount">
+            <input type="number" class="form-control" name="stockamount" id="stockamount" required>
           </div>
           <div class="mb-3">
             <label for="categoryid" class="form-label">Genre</label>
-            <input type="number" class="form-control" name = "categoryid" id="categoryid">
+            <select class="form-control" name="categoryid" id="categoryid" required>
+                <option value="1">Fiction</option>
+                <option value="2">Non-Fiction</option>
+                <option value="3">Novel</option>
+                <option value="4">Mystery</option>
+                <option value="5">Science Fiction</option>
+            </select>
           </div>
-        
+          <div class="mb-3">
+            <label for="bookimage" class="form-label">Book Image</label>
+            <input type="file" class="form-control" name="bookimage" id="bookimage" accept="image/*" required>
+          </div>          
         <button type="submit" class="btn btn-primary">Upload</button>
       </form>
 </div>

@@ -3,4 +3,42 @@
 <h1>This is Home Page</h1>
 <h5>Do you want to sell products </h5>
 <a href="/signin1">Click here</a>
+<h1>Recommended Books</h1>
+    <div id="recommendations">
+        {% if recommended_books %}
+            <ul>
+                {% for book in recommended_books %}
+<div class="card mb-4 my-3 rounded">
+    <div class="row g-0">
+        <div class="col-md-4">
+            <img src="{{ url_for('static', filename='uploads/' ~ book.ProductImage) }}" class="img-fluid rounded-start" alt="{{ book.ProductName }}">
+        </div>
+        <div class="col-md-8">
+            <div class="card-body">
+                <h5 class="card-title">{{ book.ProductName }}</h5>
+                <p class="card-text">{{ book.Description }}</p>
+                <p class="card-text"><strong>{{ book.Price }}</strong></p>
+                <div style="display: flex; flex-direction: row;">
+                    <form method="POST" action="{{ url_for('add_to_cart', product_id=book.ProductID) }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="btn btn-primary my-2 mx-2">Add to Cart</button>
+                    </form>
+                    <form action="{{ url_for('add_to_wishlist', product_id=book.ProductID) }}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-primary my-2 mx-2">Add to Wishlist</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('add_to_cart', product_id=book.ProductID) }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="btn btn-primary my-2 mx-2">Buy Now</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+            </ul>
+        {% else %}
+            <p>No recommendations available.</p>
+        {% endif %}
+    </div>
 {% endblock body %}

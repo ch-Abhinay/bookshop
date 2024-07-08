@@ -1,41 +1,35 @@
 {% extends 'base.html' %}
 {% block body %}
 <div class="container">
-    <h1>this is books section</h1>
+    <h1>This is the books section</h1>
 </div>
-<!-- <div class="card mb-4"> -->
 {% for book in books %}
-<div class="card mb-4 my-3 rounded ">
-
-
+<div class="card mb-4 my-3 rounded">
     <div class="row g-0">
         <div class="col-md-4">
-            <img src="product-image1.jpg" class="img-fluid rounded-start" alt="Product Image 1">
+            <img src="{{ url_for('static', filename='uploads/' ~ book.ProductImage) }}" class="img-fluid rounded-start" alt="{{ book.ProductName }}">
         </div>
         <div class="col-md-8">
-
-            <div class="card-body ">
-                <h5 class="card-title">{{book.ProductName}}</h5>
-                <p class="card-text">{{book.Description}}</p>
-                <p class="card-text"><strong>{{book.Price}}</strong></p>
+            <div class="card-body">
+                <h5 class="card-title">{{ book.ProductName }}</h5>
+                <p class="card-text">{{ book.Description }}</p>
+                <p class="card-text"><strong>{{ book.Price }}</strong></p>
                 <div style="display: flex; flex-direction: row;">
-                <form method="POST" action="{{ url_for('add_to_cart', product_id=book.ProductID) }}">
-                    <input type="hidden" name="quantity" value="1">
-                    <button type="submit" class="btn btn-primary my-2 mx-2">Add to Cart</button>
-                </form>
-                <form action="{{ url_for('add_to_wishlist', product_id=book.ProductID) }}" method="post" class="d-inline">
-                    <button type="submit" class="btn btn-primary my-2 mx-2">Add to Wishlist</button>
-                </form>
-                <form method="POST" action="{{ url_for('add_to_cart', product_id=book.ProductID) }}">
-                    <input type="hidden" name="quantity" value="1">
-                    <button type="submit" class="btn btn-primary my-2 mx-2">Buy Now</button>
-                </form>
-            </div>
+                    <form method="POST" action="{{ url_for('add_to_cart', product_id=book.ProductID) }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="btn btn-primary my-2 mx-2">Add to Cart</button>
+                    </form>
+                    <form action="{{ url_for('add_to_wishlist', product_id=book.ProductID) }}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-primary my-2 mx-2">Add to Wishlist</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('add_to_cart', product_id=book.ProductID) }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="btn btn-primary my-2 mx-2">Buy Now</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
-    {% endfor %}
-
-
+{% endfor %}
 {% endblock body %}

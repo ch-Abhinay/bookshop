@@ -1,8 +1,13 @@
 from flask import Flask, session, redirect, url_for, request, flash, render_template
 from flask import Flask, session, redirect, url_for, request, flash, render_template
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
+# from flask_login import current_user
 import re
 import os
 app = Flask(__name__)
@@ -12,7 +17,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 app.config['SECRET_KEY'] = os.urandom(24)
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 app.config['SESSION_COOKIE_SECURE'] = True
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
 db= SQLAlchemy(app)
+if not os.path.exists(app.config['UPLOAD_FOLDER']):
+    os.makedirs(app.config['UPLOAD_FOLDER'])
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -40,12 +48,13 @@ class Products(db.Model):
     __tablename__ = 'products'
     ProductID = db.Column(db.Integer, primary_key=True)
     ProductName= db.Column(db.String(50), nullable=False)
-
+    Author= db.Column(db.String(30), nullable=False)
     Description= db.Column(db.String(100), nullable=False)
     Price= db.Column(db.Integer, nullable=False)
     StockQuantity= db.Column(db.Integer,nullable=False)
     CategoryID= db.Column(db.Integer,db.ForeignKey('categories.CategoryID'), nullable=False )
     MerchantID = db.Column(db.Integer, db.ForeignKey('users.UserID'), nullable=False) 
+    ProductImage = db.Column(db.String(100), nullable=False)
 
 class Categories(db.Model):
     __tablename__='categories'
@@ -116,10 +125,44 @@ class WishlistItems(db.Model):
     ProductID= db.Column(db.Integer,db.ForeignKey('products.ProductID'), nullable=False)
     product = db.relationship('Products', backref=db.backref('wishlist_items', lazy=True))
 
+vectorizer = TfidfVectorizer(stop_words='english')
+def get_user_books():
+    if 'user_id' not in session:
+        return False
+    
+    wish=Wishlist.query.filter_by(UserID=session['user_id']).first()
+    carts=Carts.query.filter_by(UserID=session['user_id']).first()
+    if not wish or not carts :
+        return False
+    wishlist_books = WishlistItems.query.filter_by(WishlistID=(wish).WishlistID).all()
+    cart_books = CartItems.query.filter_by(CartID=(carts).CartID).all()
+    return wishlist_books + cart_books
 
 @app.route('/')
 def home():
-    return render_template('home.html')
+    user_books = get_user_books()
+    if not user_books:
+        flash('No books in your wishlist or cart.', 'warning')
+        return render_template('home.html', recommended_books=[])
+    books_data = Products.query.all()
+    
+    user_books_data = [f"{book.product.ProductName} {book.product.Description} {book.product.Author} " for book in user_books]
+    all_books_data = [f"{book.ProductName} {book.Description} {book.Author} " for book in books_data]
+    
+    all_books_vectorized = vectorizer.fit_transform(all_books_data)
+    
+    user_books_vectorized = vectorizer.transform(user_books_data)
+    
+    similarities = cosine_similarity(user_books_vectorized, all_books_vectorized)
+    
+    average_similarity = similarities.mean(axis=0)
+    
+    recommended_indices = average_similarity.argsort()[-5:][::-1]  # Top 5 recommendations
+    
+    # Get the recommended books using the indices
+    recommended_books = [books_data[i] for i in recommended_indices]
+    
+    return render_template('home.html', recommended_books=recommended_books)
 
 @app.route('/books', methods=['POST','GET'])
 def books():
@@ -312,25 +355,36 @@ def signin1():
 #     products = Products.query.filter_by(MerchantID=user.UserID).all()
 #     return render_template('merchant_dash.html',products = products)
 
-@app.route('/dashboard/add_book',methods = ['POST','GET'])
+@app.route('/dashboard/add_book', methods=['POST', 'GET'])
 def add_book():
-    if request.method == "POST":
+    if request.method == 'POST':
         bookname = request.form['bookname']
+        author = request.form['author']
         bookdesc = request.form['bookdesc']
         bookprice = request.form['bookprice']
         stockamount = request.form['stockamount']
         categoryid = request.form['categoryid']
-        product = Products(
-            ProductName = bookname,
-            Description = bookdesc,
-            Price = bookprice,
-            StockQuantity = stockamount,
-            CategoryID = categoryid,
-            MerchantID = session.get('user_id')
+        bookimage = request.files['bookimage']
+
+        if bookimage:
+            filename = secure_filename(bookimage.filename)
+            bookimage.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+            product = Products(
+                ProductName=bookname,
+                Author=author,
+                Description=bookdesc,
+                Price=bookprice,
+                StockQuantity=stockamount,
+                CategoryID=categoryid,
+                ProductImage=filename,  # Assuming you have this field in your Products model
+                MerchantID=session.get('user_id')
             )
-        db.session.add(product)
-        db.session.commit()
+            db.session.add(product)
+            db.session.commit()
+            return redirect(url_for('dashboard'))  # Redirect to a suitable page after adding the book
     return render_template('add_book.html')
+
 
 @app.route('/search',methods = ['GET','POST'])
 def search():
@@ -786,6 +840,6 @@ def order_confirmation(order_id):
 
 
 if __name__ == '__main__':
-    
+
 
     app.run(debug=True)

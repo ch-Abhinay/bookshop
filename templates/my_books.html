@@ -8,7 +8,7 @@
 <div class="card mb-4 my-3 rounded ">
     <div class="row g-0">
         <div class="col-md-4">
-            <img src="product-image1.jpg" class="img-fluid rounded-start" alt="Product Image 1">
+            <img src="{{ url_for('static', filename='uploads/' ~ product.ProductImage) }}" class="img-fluid rounded-start" alt="{{ product.ProductName }}">
         </div>
         <div class="col-md-8">
             <div class="card-body ">
