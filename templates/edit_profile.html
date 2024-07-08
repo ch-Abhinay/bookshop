@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block body %}
+<div class="container mt-5">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Edit Profile</h5>
+      <form method="POST" action="{{ url_for('edit_profile') }}">
+        <div class="form-group">
+          <label for="FirstName">First Name</label>
+          <input type="text" class="form-control" id="FirstName" name="FirstName" value="{{ user.FirstName }}" required>
+        </div>
+        <div class="form-group">
+          <label for="LastName">Last Name</label>
+          <input type="text" class="form-control" id="LastName" name="LastName" value="{{ user.LastName }}" required>
+        </div>
+        <div class="form-group">
+          <label for="Email">Email</label>
+          <input type="email" class="form-control" id="Email" name="Email" value="{{ user.Email }}" required>
+        </div>
+        <div class="form-group">
+          <label for="Phone">Phone</label>
+          <input type="text" class="form-control" id="Phone" name="Phone" value="{{ user.Phone }}">
+        </div>
+        {% if user.UserType == 'merchant' %}
+        <div class="form-group">
+          <label for="GSTPanNumber">GST/PAN Number</label>
+          <input type="text" class="form-control" id="GSTPanNumber" name="GSTPanNumber" value="{{ user.GSTPanNumber }}">
+        </div>
+        {% endif %}
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock body %}
