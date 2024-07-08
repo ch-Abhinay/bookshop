@@ -194,6 +194,34 @@ def login():
             flash('Invalid email or password', 'danger')
     # print(allusers)
     return render_template('login.html')
+
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form['email']
+        user = User.query.filter_by(Email=email).first()
+        if user:
+            return redirect(url_for('reset_password', user_id=user.UserID))
+        else:
+            flash('No account found with that email.', 'danger')
+    return render_template('forgot_password.html')
+
+@app.route('/reset_password/<int:user_id>', methods=['GET', 'POST'])
+def reset_password(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        flash('Invalid or expired reset link.', 'danger')
+        return redirect(url_for('forgot_password'))
+    
+    if request.method == 'POST':
+        password = request.form['password']
+        user.PasswordHash = generate_password_hash(password)
+        db.session.commit()
+        flash('Your password has been updated!', 'success')
+        return redirect(url_for('login'))
+    
+    return render_template('reset_password.html', user=user)
+
  
 @app.route('/signin', methods=['GET','POST'])
 def signin():
@@ -234,6 +262,29 @@ def dashboard():
     user = User.query.get(session['user_id'])
     products = Products.query.filter_by(MerchantID=user.UserID).all()
     return render_template('dashboard.html', user=user, products= products)
+
+@app.route('/edit_profile', methods=['GET', 'POST'])
+def edit_profile():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))  # Redirect to login if user is not logged in
+
+    user = User.query.get(session['user_id'])
+    if not user:
+        return redirect(url_for('login'))  # Redirect to login if user not found
+
+    if request.method == 'POST':
+        user.FirstName = request.form['FirstName']
+        user.LastName = request.form['LastName']
+        user.Email = request.form['Email']
+        user.Phone = request.form['Phone']
+        if 'GSTPanNumber' in request.form:
+            user.GSTPanNumber = request.form['GSTPanNumber']
+
+        db.session.commit()
+        return redirect(url_for('dashboard'))
+
+    return render_template('edit_profile.html', user=user)
+
 
 @app.route('/dashboard/my_books')
 def my_books():

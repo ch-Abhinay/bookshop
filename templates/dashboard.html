@@ -3,7 +3,16 @@
 <div class="card mt-5">
   <div class="card-body">
     <h5 class="card-title">Dashboard</h5>
-    <p>Welcome, {{ user.FirstName }}!</p>
+    <p><strong>Welcome,</strong> {{ user.FirstName }} {{ user.LastName }}!</p>
+    <p><strong>Email:</strong> {{ user.Email }}</p>
+    <p><strong>Phone:</strong> {{ user.Phone }}</p>
+    <p><strong>Registration Date:</strong> {{ user.RegistrationDate.strftime('%Y-%m-%d') }}</p>
+    <p><strong>User Type:</strong> {{ user.UserType }}</p>
+    {% if user.UserType == 'merchant' %}
+    <p>GST/PAN Number: {{ user.GSTPanNumber }}</p>
+    {% endif %}
+    <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">Edit Profile</a>
+
     {% if user.UserType =='merchant' %}
     <div class="container mt-5">
       <h3>Merchant Dashboard</h3>

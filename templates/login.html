@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% block body %}
-
-    <h1 >this is login page</h1>
+    <h1>this is login page</h1>
     <div class="container" id="login" style="max-width: 655px; margin: auto; padding: 50px;">
       <div class="card" style="max-width: 500px; width: 100%;">
         <div class="card-body">
@@ -16,7 +15,8 @@
                 <input type="password" class="form-control" id="exampleInputPassword1" name="password" required>
               </div>
               <button type="submit" class="btn btn-primary my-3">Submit</button>
-              <p>don't have account?<a href="/signin">signin</a></p>
+              <p>Don't have an account? <a href="/signin">Sign in</a></p>
+              <p><a href="{{ url_for('forgot_password') }}">Forgot Password?</a></p>
             </form>
           </div>
         </div>
