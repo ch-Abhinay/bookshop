@@ -11,9 +11,10 @@
         </div>
         <div class="col-md-8">
             <div class="card-body">
-                <h5 class="card-title">{{ book.ProductName }}</h5>
-                <p class="card-text">{{ book.Description }}</p>
-                <p class="card-text"><strong>{{ book.Price }}</strong></p>
+                <h5 class="card-title"><strong>Title: </strong> {{ book.ProductName }}</h5>
+                <p class="card-title"><strong>Author: </strong> {{ book.Author }}</p>
+                <p class="card-text"><strong>Description: </strong> {{ book.Description }}</p>
+                <p class="card-text"><strong>Price: </strong>Rs.{{ book.Price }}</p>
                 <div style="display: flex; flex-direction: row;">
                     <form method="POST" action="{{ url_for('add_to_cart', product_id=book.ProductID) }}">
                         <input type="hidden" name="quantity" value="1">

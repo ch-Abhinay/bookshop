@@ -1,40 +1,38 @@
 {% extends 'base.html' %}
 {% block body %}
-    <h1> This is signin1 page</h1>
-    <div class="container" id="signup" style="max-width: 655px; margin: auto; padding: 50px;">
-        <div class="container" id="login" style="max-width: 655px; margin: auto; padding: 50px;">
-            <div class="card" style="max-width: 500px; width: 100%;">
-                <div class="card-body">
-                    <h5 class="card-title text-center">Sign Up</h5>
-                    <form action="/signin1" method="post">
-                        <div class="sm">
-                            <label for="firstName" class="form-label">First Name</label>
-                            <input type="text" class="form-control" id="firstName" name="firstName" required>
-                        </div>
-                        <div class="sm">
-                            <label for="lastName" class="form-label">Last Name</label>
-                            <input type="text" class="form-control" id="lastName" name="lastName" required>
-                        </div>
-                        <div class="sm">
-                            <label for="gstnumber" class="form-label">GST/PAN Number</label>
-                            <input type="number" class="form-control" id="gstnumber" name="gstnum" required>
-                        </div>
-                        <div class="sm">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                        </div>
-                        <div class="sm">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
-                        </div>
-                        <div class="sm">
-                            <label for="phone" class="form-label">Phone (optional)</label>
-                            <input type="text" class="form-control" id="phone" name="phone">
-                        </div>
-                        <button type="submit" class="btn btn-primary my-3">Sign Up</button>
-                        <p>Already have an account? <a href="/login1">Login</a></p>
-                    </form>
-                </div>
+    <h1>This is Sign Up Page</h1>
+    <div class="container" style="max-width: 500px; margin: auto;">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title text-center">Sign Up</h5>
+                <form action="/signin1" method="post">
+                    <div class="mb-3">
+                        <label for="firstName" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="firstName" name="firstName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="lastName" class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="lastName" name="lastName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="gstnumber" class="form-label">GST/PAN Number</label>
+                        <input type="text" class="form-control" id="gstnumber" name="gstnum" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone (optional)</label>
+                        <input type="text" class="form-control" id="phone" name="phone">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+                    <p class="text-center mt-3">Already have an account? <a href="/login1">Login</a></p>
+                </form>
             </div>
         </div>
     </div>

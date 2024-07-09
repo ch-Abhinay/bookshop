@@ -25,10 +25,11 @@
 </div>
 {% endfor %}
 <div class="container">
-    <a href="/dashboard/add_book" class="btn btn-primary">Add Book</a>
+    <a href="{{ url_for('add_book') }}" class="btn btn-primary">Add Book</a>
 </div>
 {% else %}
 <p>No books</p>
+<a href="{{ url_for('add_book') }}" class="btn btn-primary">Add a Book</a>
 {% endif %}
 
 {% endblock body %}

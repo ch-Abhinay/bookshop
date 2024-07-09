@@ -1,45 +1,52 @@
 {% extends 'base.html' %}
 {% block body %}
 <div class="container">
-    <h1>Order #{{ order.OrderID }} Items</h1>
-    <p>Order Date: {{ order.OrderDate.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-    <p>Total Amount: ${{ order.TotalAmount }}</p>
-    <p>Status: {{ order.OrderStatus }}</p>
-
+    <div class="container">
+        <h1>Order #{{ order.OrderID }} Items</h1>
+        <p>Order Date: {{ order.OrderDate.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+        <p>Total Amount: ${{ order.TotalAmount }}</p>
+        <p>Status: {{ order.OrderStatus }}</p>
+    </div>
     {% if order_items %}
-    <ul class="list-group">
-        {% for item in order_items %}
-        <li class="list-group-item">
-            <h5>Product ID : {{item.ProductID}}</h5>
-            <h5>Product: {{ product_details[item.ProductID].ProductName }}</h5>
-            <p>Quantity: {{ item.Quantity }}</p>
-            <p>Unit Price: ${{ item.UnitPrice }}</p>
-            <p>Total Price: ${{ item.Quantity * item.UnitPrice }}</p>
-            <strong>Rate this Product:</strong>
-            <!-- Form for Rating Submission -->
-            <form action="{{ url_for('order_items', order_id=order.OrderID) }}" method="post">
-                <input type="hidden" name="item_id" value="{{ item.OrderItemID }}">
-                <input type="hidden" name="product_id" value="{{ item.ProductID }}">
-
-                <!-- Star Rating System -->
-                <div class="star-rating">
-                    {% for i in range(1, 6) %}
-                    <input id="star{{ i }}-{{ item.OrderItemID }}" type="radio" name="rating-{{ item.OrderItemID }}" value="{{ i }}">
-                    <label for="star{{ i }}-{{ item.OrderItemID }}"><i class="bi bi-star-fill"></i></label>
-                    {% endfor %}
-                </div>
-
-                <!-- Comment Field -->
-                <div class="form-group mt-2">
-                    <textarea class="form-control" name="comment" placeholder="Leave a comment"></textarea>
-                </div>
-
-                <!-- Submit Button -->
-                <button type="submit" class="btn btn-primary">Submit Rating</button>
-            </form>
-        </li>
-        {% endfor %}
-    </ul>
+    <div class="container">
+        <ul class="list-group">
+            {% for item in order_items %}
+            <div class="my-3">
+                <li class="list-group-item">
+                    <h5>Product ID : {{item.ProductID}}</h5>
+                    <h5>Product: {{ product_details[item.ProductID].ProductName }}</h5>
+                    <p>Quantity: {{ item.Quantity }}</p>
+                    <p>Unit Price: ${{ item.UnitPrice }}</p>
+                    <p>Total Price: ${{ item.Quantity * item.UnitPrice }}</p>
+                    <strong>Rate this Product:</strong>
+                    <!-- Form for Rating Submission -->
+                    <form action="{{ url_for('order_items', order_id=order.OrderID) }}" method="post">
+                        <input type="hidden" name="item_id" value="{{ item.OrderItemID }}">
+                        <input type="hidden" name="product_id" value="{{ item.ProductID }}">
+    
+                        <!-- Star Rating System -->
+                        <div class="star-rating">
+                            {% for i in range(1, 6) %}
+                            <input id="star{{ i }}-{{ item.OrderItemID }}" type="radio" name="rating-{{ item.OrderItemID }}"
+                                value="{{ i }}">
+                            <label for="star{{ i }}-{{ item.OrderItemID }}"><i class="bi bi-star-fill"></i></label>
+                            {% endfor %}
+                        </div>
+    
+                        <!-- Comment Field -->
+                        <div class="form-group mt-2">
+                            <textarea class="form-control" name="comment" placeholder="Leave a comment"></textarea>
+                        </div>
+    
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary">Submit Rating</button>
+                    </form>
+                </li>
+            </div>
+    
+            {% endfor %}
+        </ul>
+    </div>
     <style>
         /* Hide radio inputs */
         .star-rating input[type="radio"] {
@@ -54,20 +61,20 @@
         }
 
         /* Active star color */
-        .star-rating input[type="radio"]:checked + label {
+        .star-rating input[type="radio"]:checked+label {
             color: gold;
         }
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const stars = document.querySelectorAll('.star-rating input[type="radio"]');
-            
+
             stars.forEach(star => {
                 star.addEventListener('change', function () {
                     const starId = this.id;
                     const itemID = starId.split('-')[1];
                     const labels = document.querySelectorAll(`.star-rating label[for^="star"][for$="-${itemID}"]`);
-                    
+
                     labels.forEach(label => {
                         const starIndex = parseInt(label.htmlFor.split('star')[1].split('-')[0]);
                         label.style.color = (starIndex <= parseInt(this.value)) ? 'gold' : '#333';
@@ -79,6 +86,6 @@
     {% else %}
     <p>No items found for this order.</p>
     {% endif %}
-    <a href="{{ url_for('orders') }}" class="btn btn-primary">Back to Orders</a>
+    <a href="{{ url_for('orders') }}" class="btn btn-primary my-3">Back to Orders</a>
 </div>
 {% endblock body %}

@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-
 {% block body %}
 <div class="container mt-5">
     <h2>Search Results</h2>
@@ -8,7 +7,7 @@
         <div class="col-md-12">
             <div class="card mb-4">
                 <div class="col-md-4">
-                    <img src="product-image.jpg" class="img-fluid rounded-start" alt="Product Image ">
+                    <img src="{{ url_for('static', filename='uploads/' ~ product.ProductImage) }}" class="img-fluid rounded-start" alt="{{ product.ProductName }}">
                 </div>
                 <div class="card-body">
                     <h5 class="card-title">{{ product.ProductName }}</h5>

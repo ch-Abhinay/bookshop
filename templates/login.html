@@ -1,25 +1,28 @@
 {% extends 'base.html' %}
 {% block body %}
-    <h1>this is login page</h1>
-    <div class="container" id="login" style="max-width: 655px; margin: auto; padding: 50px;">
-      <div class="card" style="max-width: 500px; width: 100%;">
-        <div class="card-body">
-            <h5 class="card-title text-center">Login</h5>
-            <form action="/login" method="post">
-              <div class="sm">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" required>
-              </div>
-              <div class="sm">
-                <label for="exampleInputPassword1" class="form-label">Password</label>
-                <input type="password" class="form-control" id="exampleInputPassword1" name="password" required>
-              </div>
-              <button type="submit" class="btn btn-primary my-3">Submit</button>
-              <p>Don't have an account? <a href="/signin">Sign in</a></p>
-              <p><a href="{{ url_for('forgot_password') }}">Forgot Password?</a></p>
-            </form>
-          </div>
+    <div class="container" id="login">
+        <div class="card mx-auto my-5" style="max-width: 500px;">
+            <div class="card-body">
+                <h5 class="card-title text-center mb-4">Login</h5>
+                <form action="/login" method="post">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="exampleInputPassword1" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="exampleInputPassword1" name="password" required>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary rounded-pill px-4">Log In</button>
+                    </div>
+                    <div class="text-center mt-3">
+                        <p>Don't have an account? <a href="/signin">Sign in</a></p>
+                        <p><a href="{{ url_for('forgot_password') }}">Forgot Password?</a></p>
+                    </div>
+                </form>
+            </div>
         </div>
-      </div>
     </div>
 {% endblock body %}
+

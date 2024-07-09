@@ -5,11 +5,11 @@
     <h5 class="card-title">Dashboard</h5>
     <p><strong>Welcome,</strong> {{ user.FirstName }} {{ user.LastName }}!</p>
     <p><strong>Email:</strong> {{ user.Email }}</p>
-    <p><strong>Phone:</strong> {{ user.Phone }}</p>
+    <p><strong>Phone:</strong> {% if user.Phone %}{{user.Phone}}{% else %}Not entered <a href="{{ url_for('edit_profile') }}">Add Phone number</a>{% endif %}</p>
     <p><strong>Registration Date:</strong> {{ user.RegistrationDate.strftime('%Y-%m-%d') }}</p>
     <p><strong>User Type:</strong> {{ user.UserType }}</p>
     {% if user.UserType == 'merchant' %}
-    <p>GST/PAN Number: {{ user.GSTPanNumber }}</p>
+    <p><strong>GST/PAN Number:</strong> {{ user.GSTPanNumber }}</p>
     {% endif %}
     <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">Edit Profile</a>
 

@@ -4,17 +4,20 @@
     <h1>My Orders</h1>
 </div>
 {% if orders %}
-<div class="container">
-    
-    <ul class="list-group">
-        
+<div class="card mb-4 my-3 rounded">
+
+    <ul class="list-group ">
+
         {% for order in orders %}
         <li class="list-group-item">
-            <h5>Order </h5>
-            <p>Order Date: {{ order.OrderDate.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-            <p>Total Amount: ${{ order.TotalAmount }}</p>
-            <p>Status: {{ order.OrderStatus }}</p>
-            <a href="{{ url_for('order_items', order_id=order.OrderID) }}" class="btn btn-primary">View Order Items</a>
+            <div class="container my-3">
+                <h5>Order </h5>
+                <p>Order Date: {{ order.OrderDate.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                <p>Total Amount: ${{ order.TotalAmount }}</p>
+                <p>Status: {{ order.OrderStatus }}</p>
+                <a href="{{ url_for('order_items', order_id=order.OrderID) }}" class="btn btn-primary">View Order
+                    Items</a>
+            </div>
         </li>
         {% endfor %}
     </ul>

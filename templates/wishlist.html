@@ -28,6 +28,7 @@
         {% endfor %}
     {% else %}
         <p>Your wishlist is empty.</p>
+        <a href="{{ url_for('books') }}" class="btn btn-primary">Browse our Books</a>
     {% endif %}
 </div>
 {% endblock body %}

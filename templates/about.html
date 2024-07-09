@@ -1,4 +1,30 @@
 {% extends 'base.html' %}
+
 {% block body %}
-    <h1>this is about page</h1>
+<div class="container mt-5">
+    <h1>About Us</h1>
+    <p>Welcome to Bookshop! We are dedicated to providing the best selection of books at competitive prices.</p>
+
+    <h2>Our Mission</h2>
+    <p>Our mission is to promote literacy and the love of reading by offering a wide range of books that cater to all interests and age groups.</p>
+
+    <h2>Our Values</h2>
+    <ul>
+        <li><strong>Customer Satisfaction:</strong> We strive to provide exceptional customer service and support.</li>
+        <li><strong>Quality:</strong> We offer a curated selection of high-quality books.</li>
+        <li><strong>Integrity:</strong> We conduct our business with honesty and transparency.</li>
+    </ul>
+
+    <h2>How to Place an Order</h2>
+    <ol>
+        <li><strong>Browse Books:</strong> Visit the <a href="{{ url_for('books') }}">Books</a> section to browse our collection.</li>
+        <li><strong>Select a Book:</strong> Click on a book to view its details and add it to your cart.</li>
+        <li><strong>View Cart:</strong> Once you have selected your books, click on the my cart icon to view your cart.</li>
+        <li><strong>Checkout:</strong> Click the 'Proceed to Checkout' button and enter your shipping and payment details.</li>
+        <li><strong>Order Confirmation:</strong> After completing the checkout process, you will receive an order confirmation email.</li>
+    </ol>
+
+    <h2>Contact Us</h2>
+    <p>If you have any questions or need assistance, please visit our <a href="{{ url_for('contactus') }}">Contact Us</a> page.</p>
+</div>
 {% endblock body %}
