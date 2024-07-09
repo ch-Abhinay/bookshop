@@ -13,9 +13,10 @@
         </div>
         <div class="col-md-8">
             <div class="card-body">
-                <h5 class="card-title">{{ item.product.ProductName }}</h5>
-                <p class="card-text">{{ item.product.Description }}</p>
-                <p class="card-text"><strong>{{ item.product.Price }}</strong></p>
+                <h5 class="card-title"><strong>Title: </strong>{{ item.product.ProductName }}</h5>
+                <p class="card-text"><strong>Author: </strong>{{ item.product.Author }}</p>
+                <p class="card-text"><strong>Description: </strong>{{ item.product.Description }}</p>
+                <p class="card-text"><strong>Price: Rs.{{ item.product.Price }}</strong></p>
                 <p class="card-text"><strong>Quantity: {{ item.Quantity }}</strong></p>
                 <form action="{{ url_for('update_cart_item', item_id=item.CartItemID) }}" method="post"
                     class="d-inline">

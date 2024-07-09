@@ -10,14 +10,18 @@
                     <img src="{{ url_for('static', filename='uploads/' ~ product.ProductImage) }}" class="img-fluid rounded-start" alt="{{ product.ProductName }}">
                 </div>
                 <div class="card-body">
-                    <h5 class="card-title">{{ product.ProductName }}</h5>
-                    <p class="card-text">{{ product.Description }}</p>
-                    <p class="card-text"><strong>${{ product.Price }}</strong></p>
+                    <h5 class="card-title"><strong>Title: </strong>{{ product.ProductName }}</h5>
+                    <p class="card-text"><strong>Author: </strong>{{ product.Author }}</p>
+                    <p class="card-text"><strong>Description: </strong>{{ product.Description }}</p>
+                    <p class="card-text"><strong>Price : Rs.{{ product.Price }}</strong></p>
                     <form method="POST" action="{{ url_for('add_to_cart', product_id=product.ProductID) }}">
                         <input type="hidden" name="quantity" value="1">
                         <button type="submit" class="btn btn-primary my-2">Add to Cart</button>
                     </form>
-                    <a href="#" class="btn btn-primary my-2">Buy Now </a>
+                    <form method="POST" action="{{ url_for('add_to_cart', product_id=product.ProductID) }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="btn btn-primary my-2 ">Buy Now</button>
+                    </form>
                 </div>
             </div>
         </div>
