@@ -8,25 +8,24 @@
 <div class="card mb-4 my-3 rounded">
     <div class="row g-0">
         <div class="col-md-4">
-            <img src="{{ url_for('static', filename='uploads/' ~ item.product.ProductImage) }}"
-                class="img-fluid rounded-start" alt="{{ item.product.ProductName }}">
+            <img src="{{ url_for('static', filename='uploads/' ~ product_map[item.ProductID].ProductImage) }}"
+                class="img-fluid rounded-start" alt="{{ product_map[item.ProductID].ProductName }}">
         </div>
         <div class="col-md-8">
             <div class="card-body">
-                <h5 class="card-title"><strong>Title: </strong>{{ item.product.ProductName }}</h5>
-                <p class="card-text"><strong>Author: </strong>{{ item.product.Author }}</p>
-                <p class="card-text"><strong>Description: </strong>{{ item.product.Description }}</p>
-                <p class="card-text"><strong>Price: Rs.{{ item.product.Price }}</strong></p>
+                <h5 class="card-title"><strong>Title: </strong>{{ product_map[item.ProductID].ProductName }}</h5>
+                <p class="card-text"><strong>Author: </strong>{{ product_map[item.ProductID].Author }}</p>
+                <p class="card-text"><strong>Description: </strong>{{ product_map[item.ProductID].Description }}</p>
+                <p class="card-text"><strong>Genre: </strong>{{ category_map[product_map[item.ProductID].CategoryID] }}</p>
+                <p class="card-text"><strong>Price: Rs.{{ product_map[item.ProductID].Price }}</strong></p>
                 <p class="card-text"><strong>Quantity: {{ item.Quantity }}</strong></p>
-                <form action="{{ url_for('update_cart_item', item_id=item.CartItemID) }}" method="post"
-                    class="d-inline">
+                <form action="{{ url_for('update_cart_item', item_id=item.CartItemID) }}" method="post" class="d-inline">
                     <label for="quantity">
-                        <input type="number" name="quantity" value="{{ item.Quantity }}" min="1"
-                            class="form-control d-inline-block">
-                        <button type="submit" class="btn btn-warning my-3">Update</button></label>
+                        <input type="number" name="quantity" value="{{ item.Quantity }}" min="1" class="form-control d-inline-block">
+                        <button type="submit" class="btn btn-warning my-3">Update</button>
+                    </label>
                 </form>
-                <form action="{{ url_for('delete_cart_item', item_id=item.CartItemID) }}" method="post"
-                    class="d-inline">
+                <form action="{{ url_for('delete_cart_item', item_id=item.CartItemID) }}" method="post" class="d-inline">
                     <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
                 <!-- <a href="{{ url_for('checkout') }}" class="btn btn-primary">Buy Now</a> -->

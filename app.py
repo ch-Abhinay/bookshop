@@ -143,29 +143,34 @@ def home():
     user_books = get_user_books()
     if not user_books:
         flash('No books in your wishlist or cart.', 'warning')
-        return render_template('home.html', recommended_books=[])
+        return render_template('home.html', recommended_books=[], category_map={})
+
     books_data = Products.query.all()
+    categories = Categories.query.all()
     
-    user_books_data = [f"{book.product.ProductName} {book.product.Description} {book.product.Author} " for book in user_books]
-    all_books_data = [f"{book.ProductName} {book.Description} {book.Author} " for book in books_data]
+    category_map = {category.CategoryID: category.CategoryName for category in categories}
+
+    user_books_data = [f"{book.product.ProductName} {book.product.Description} {book.product.Author}" for book in user_books]
+    all_books_data = [f"{book.ProductName} {book.Description} {book.Author}" for book in books_data]
     
     all_books_vectorized = vectorizer.fit_transform(all_books_data)
-    
     user_books_vectorized = vectorizer.transform(user_books_data)
     
     similarities = cosine_similarity(user_books_vectorized, all_books_vectorized)
-    
     average_similarity = similarities.mean(axis=0)
     
     recommended_indices = average_similarity.argsort()[-5:][::-1]  
     recommended_books = [books_data[i] for i in recommended_indices]
     
-    return render_template('home.html', recommended_books=recommended_books )
+    return render_template('home.html', recommended_books=recommended_books, category_map=category_map)
 
-@app.route('/books', methods=['POST','GET'])
+
+@app.route('/books', methods=['POST', 'GET'])
 def books():
     books = Products.query.all()
-    return render_template('books.html', books = books)
+    categories = Categories.query.all()
+    category_map = {category.CategoryID: category.CategoryName for category in categories}
+    return render_template('books.html', books=books, category_map=category_map)
 
 @app.route('/contactus')
 def contactus():
@@ -478,10 +483,18 @@ def mycart():
     cart = Carts.query.filter_by(UserID=user_id).first()
     if not cart:
         flash('Your cart is empty!', 'info')
-        return render_template('cart.html', cart_items=[])
+        return render_template('cart.html', cart_items=[], product_map={}, category_map={})
 
     cart_items = CartItems.query.filter_by(CartID=cart.CartID).all()
-    return render_template('cart.html', cart_items=cart_items)
+    product_ids = [item.ProductID for item in cart_items]
+    products = Products.query.filter(Products.ProductID.in_(product_ids)).all()
+    categories = Categories.query.all()
+    
+    product_map = {product.ProductID: product for product in products}
+    category_map = {category.CategoryID: category.CategoryName for category in categories}
+
+    return render_template('cart.html', cart_items=cart_items, product_map=product_map, category_map=category_map)
+
 
 @app.route('/update_cart_item/<int:item_id>', methods=['POST'])
 def update_cart_item(item_id):
@@ -524,10 +537,15 @@ def wishlist():
     wishlist = Wishlist.query.filter_by(UserID=user_id).first()
     if not wishlist:
         flash('Your wishlist is empty!', 'info')
-        return render_template('wishlist.html', wishlist_items=[])
+        return render_template('wishlist.html', wishlist_items=[], category_map={})
     
     wishlist_items = WishlistItems.query.filter_by(WishlistID=wishlist.WishlistID).all()
-    return render_template('wishlist.html', wishlist_items=wishlist_items)
+    
+    # Fetch categories to create category_map
+    categories = Categories.query.all()
+    category_map = {category.CategoryID: category.CategoryName for category in categories}
+
+    return render_template('wishlist.html', wishlist_items=wishlist_items, category_map=category_map)
 
 @app.route('/add_to_wishlist/<int:product_id>', methods=['POST'])
 def add_to_wishlist(product_id):

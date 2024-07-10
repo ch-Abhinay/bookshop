@@ -11,9 +11,11 @@
                 </div>
                 <div class="col-md-8">
                     <div class="card-body">
-                        <h5 class="card-title">{{ item.product.ProductName }}</h5>
-                        <p class="card-text">{{ item.product.Description }}</p>
-                        <p class="card-text"><strong>{{ item.product.Price }}</strong></p>
+                        <h5 class="card-title"><strong>Title: </strong>{{ item.product.ProductName }}</h5>
+                        <p class="card-text"><strong>Author: </strong>{{ item.product.Author }}</p>
+                        <p class="card-text"><strong>Description: </strong>{{ item.product.Description }}</p>
+                        <p class="card-text"><strong>Genre:</strong> {{ category_map[item.product.CategoryID] }}</p>
+                        <p class="card-text"><strong>Price: Rs.{{ item.product.Price }}</strong></p>
                         <form action="{{ url_for('remove_wishlist_item', item_id=item.WishlistItemID) }}" method="post" class="d-inline">
                             <button type="submit" class="btn btn-danger">Remove</button>
                         </form>
@@ -32,3 +34,4 @@
     {% endif %}
 </div>
 {% endblock body %}
+
