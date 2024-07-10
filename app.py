@@ -157,12 +157,10 @@ def home():
     
     average_similarity = similarities.mean(axis=0)
     
-    recommended_indices = average_similarity.argsort()[-5:][::-1]  # Top 5 recommendations
-    
-    # Get the recommended books using the indices
+    recommended_indices = average_similarity.argsort()[-5:][::-1]  
     recommended_books = [books_data[i] for i in recommended_indices]
     
-    return render_template('home.html', recommended_books=recommended_books)
+    return render_template('home.html', recommended_books=recommended_books )
 
 @app.route('/books', methods=['POST','GET'])
 def books():
