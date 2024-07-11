@@ -98,6 +98,17 @@ To run the project locally, follow these steps:
 5. **Access the application**:
     Open your web browser and navigate to `http://127.0.0.1:5000`.
 
+## Deployed Application
+
+The Bookstore Application is deployed and accessible online. You can visit the deployed application at [http://bookshop24.pythonanywhere.com/](http://bookshop24.pythonanywhere.com/).
+
+### PythonAnywhere
+
+PythonAnywhere is a cloud-based platform that simplifies the deployment and hosting of Python applications. It provides tools for managing web applications, databases, and scheduled tasks directly from your browser, making it convenient for developers to deploy and maintain their projects online.
+
+For more information about PythonAnywhere and how to deploy Python applications, visit [PythonAnywhere.com](https://www.pythonanywhere.com/).
+
+
 ## Contributing
 
 We welcome contributions to improve the project. If you have suggestions or bug reports, please open an issue on GitHub. For code contributions, please fork the repository and submit a pull request.
