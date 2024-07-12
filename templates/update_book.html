@@ -1,30 +1,49 @@
-{% include 'base.html' %}
+{% extends 'base.html' %}
 {% block body %}
 <div class="container">
     <h3>Update your details</h3>
     <form method="post" action="/update/{{product.ProductID}}">
         <div class="mb-3">
-          <label for="name" class="form-label">Book Name</label>
-          <input type="text" class="form-control" name = "name" value = "{{product.ProductName}}" id="bookname">
+            <label for="bookname" class="form-label">Book Name</label>
+            <input type="text" class="form-control" name="name" value="{{product.ProductName}}" id="bookname" autocomplete="off" required>
         </div>
         <div class="mb-3">
-          <label for="desc" class="form-label">Book Description</label>
-          <input type="text" class="form-control" name = "desc" value = "{{product.Description}}" id="bookdesc">
+          <label for="author" class="form-label">Author</label>
+          <input type="text" class="form-control" name="author" value="{{product.Author}}" id="author" autocomplete="off" required>
         </div>
         <div class="mb-3">
-            <label for="price" class="form-label">Book Price</label>
-            <input type="number" class="form-control" name = "price" value = "{{product.Price}}" id="bookprice">
+            <label for="bookdesc" class="form-label">Book Description</label>
+            <input type="text" class="form-control" name="desc" value="{{product.Description}}" id="bookdesc" autocomplete="off" required>
+        </div>
+        <div class="mb-3">
+            <label for="bookprice" class="form-label">Book Price</label>
+            <input type="number" class="form-control" name="price" value="{{product.Price}}" id="bookprice" autocomplete="off" required>
+        </div>
+        <div class="mb-3">
+            <label for="stockamount" class="form-label">Stock Quantity</label>
+            <input type="number" class="form-control" name="amount" value="{{product.StockQuantity}}" id="stockamount" autocomplete="off" required>
+        </div>
+        <div class="mb-3">
+          <label for="categoryid" class="form-label">Genre</label>
+          <select class="form-control" name="categoryid" id="categoryid" autocomplete="off" required>
+            <option value="1" {% if product.CategoryID == 1 %}selected{% endif %}>Fiction</option>
+            <option value="2" {% if product.CategoryID == 2 %}selected{% endif %}>Non-Fiction</option>
+            <option value="3" {% if product.CategoryID == 3 %}selected{% endif %}>Novel</option>
+            <option value="4" {% if product.CategoryID == 4 %}selected{% endif %}>Mystery</option>
+            <option value="5" {% if product.CategoryID == 5 %}selected{% endif %}>Science Fiction</option>
+          </select>
+        </div>        
+        <div class="mb-3">
+          <label for="bookimage" class="form-label">Book Image</label>
+          <input type="file" class="form-control" name="bookimage" id="bookimage" accept="image/*" autocomplete="off">
+        </div>
+        <div class="mb-3">
+          <p class="form-label">Current Image</p>
+          <div>
+            <img src="{{ url_for('static', filename='uploads/' ~ product.ProductImage) }}" alt="Current Image" width="100">
           </div>
-          <div class="mb-3">
-            <label for="amount" class="form-label">Stock Quantity</label>
-            <input type="number" class="form-control" name = "amount" value = "{{product.StockQuantity}}" id="stockamount">
-          </div>
-          <div class="mb-3">
-            <label for="category" class="form-label">Genre</label>
-            <input type="number" class="form-control" name = "category" value = "{{product.CategoryID}}" id="categoryid">
-          </div>
-        
-        <button type="submit" class="btn btn-primary">Update</button>
-      </form>
+        </div>
+        <button type="submit" class="btn btn-primary my-3">Update</button>
+    </form>
 </div>
 {% endblock body %}

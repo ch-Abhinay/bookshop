@@ -296,35 +296,54 @@ def my_books():
         
     user = User.query.get(session['user_id'])
     products = Products.query.filter_by(MerchantID=user.UserID).all()
-    return render_template('my_books.html', products= products)
+    categories = Categories.query.all()
+    category_map = {category.CategoryID: category.CategoryName for category in categories}
+    return render_template('my_books.html', products= products,category_map=category_map)
 
 @app.route('/remove/<int:product_id>', methods=['POST'])
 def remove_product(product_id):
-    product = Products.query.get(product_id) 
+    product = Products.query.get(product_id)
     if product:
+        # Remove associated cart items
+        CartItems.query.filter_by(ProductID=product_id).delete()
+        WishlistItems.query.filter_by(ProductID=product_id).delete()
         db.session.delete(product)
         db.session.commit()
-    return redirect('/dashboard/my_books')
+    return redirect(url_for('my_books'))
 
-@app.route('/update/<int:product_id>',methods = ['GET','POST'])
+
+@app.route('/update/<int:product_id>', methods=['GET', 'POST'])
 def update(product_id):
+    product = Products.query.filter_by(ProductID=product_id).first()
+    if not product:
+        return "Product not found", 404
+
     if request.method == "POST":
         bookname = request.form['name']
+        author = request.form['author']
         bookdesc = request.form['desc']
         bookprice = request.form['price']
         stockamount = request.form['amount']
-        categoryid = request.form['category']
-        product = Products.query.filter_by(ProductID = product_id).first()
+        categoryid = request.form['categoryid']
+        
         product.ProductName = bookname
+        product.Author = author
         product.Description = bookdesc
         product.Price = bookprice
         product.StockQuantity = stockamount
         product.CategoryID = categoryid
-        db.session.add(product)
+
+        if 'bookimage' in request.files:
+            file = request.files['bookimage']
+            if file.filename:
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                product.ProductImage = filename
+        
         db.session.commit()
-        return redirect('/dashboard/my_books')
-    product = Products.query.filter_by(ProductID = product_id).first()
-    return render_template('update_book.html',product = product)
+        return redirect(url_for('my_books'))  # Use url_for for redirection
+    
+    return render_template('update_book.html', product=product)
 
 @app.route('/dashboard/my_ratings')
 def my_ratings():

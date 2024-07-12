@@ -12,9 +12,11 @@
         </div>
         <div class="col-md-8">
             <div class="card-body ">
-                <h5 class="card-title">{{product.ProductName}}</h5>
-                <p class="card-text">{{product.Description}}</p>
-                <p class="card-text"><strong>{{product.Price}}</strong></p>
+                <h5 class="card-title"><strong>Title: </strong> {{ product.ProductName }}</h5>
+                <p class="card-title"><strong>Author: </strong> {{ product.Author }}</p>
+                <p class="card-text"><strong>Description: </strong> {{ product.Description }}</p>
+                <p class="card-text"><strong>Genre: </strong> {{ category_map[product.CategoryID] }}</p>
+                <p class="card-text"><strong>Price: </strong>Rs.{{ product.Price }}</p>
                 <form action="/remove/{{ product.ProductID }}" method="post" style="display:inline;">
                     <button type="submit" class="btn btn-danger">Remove</button>
                 </form>

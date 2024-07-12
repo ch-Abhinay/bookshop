@@ -17,16 +17,20 @@
             min-height: 100vh;
             margin: 0;
         }
+
         .navbar-brand img {
             max-height: 40px;
         }
+
         .btn-primary {
             background-color: #007bff;
             border-color: #007bff;
         }
+
         .container {
             flex: 1;
         }
+
         footer {
             background-color: #343a40;
             color: white;
@@ -37,14 +41,12 @@
     {% block hero %}
 
     {% endblock hero %}
-    <title>Hello, world!</title>
-</head>
-<body>
     <title>BookShop</title>
-  </head>
-  <body>  
+</head>
+
+<body>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light ">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container">
                 <a class="navbar-brand" href="/"><img src="{{ url_for('static', filename='logo1.jpeg') }}" alt="Bookshop Logo"></a>
                 <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbar"
@@ -69,7 +71,7 @@
                         <button class="btn btn-outline-primary" type="submit">Search</button>
                     </form>
                 </div>
-            </div>            
+            </div>
             <ul class="navbar-nav ml-auto">
                 {% if 'user_id' in session %}
                 <li class="nav-item">
@@ -97,13 +99,12 @@
     </header>
     <div class="container">
         {% block body %}
-
         {% endblock body %}
     </div>
     <footer>
         <div class="container">
             <p>&copy; 2024 Bookshop. All rights reserved.</p>
-            <p>Contact Us : 9949970528 | 7396365885</p>
+            <p>Contact Us: 9949970528 | 7396365885</p>
             <p><a href="/privacy-policy">Privacy Policy</a> | <a href="/terms-of-service">Terms of Service</a></p>
         </div>
     </footer>
@@ -119,4 +120,5 @@
         integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
         crossorigin="anonymous"></script>
 </body>
+
 </html>
