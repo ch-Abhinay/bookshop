@@ -7,6 +7,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 # from flask_login import current_user
+import speech_recognition as sr
+
 import re
 import os
 import speech_recognition as sr
@@ -305,6 +307,44 @@ def my_books():
     categories = Categories.query.all()
     category_map = {category.CategoryID: category.CategoryName for category in categories}
     return render_template('my_books.html', products= products,category_map=category_map)
+
+@app.route('/dashboard/offlineservices', methods=['GET', 'POST'])
+def offlineservices():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    user = User.query.get(session['user_id'])
+    products = Products.query.filter_by(MerchantID=user.UserID).all()
+    categories = Categories.query.all()
+    category_map = {category.CategoryID: category.CategoryName for category in categories}
+
+    if request.method == 'POST':
+        book_ids = request.form.getlist('book_id[]')
+        quantities = request.form.getlist('quantity[]')
+
+        # Handle form submission for offline services
+        for book_id, quantity in zip(book_ids, quantities):
+            product = Products.query.filter_by(ProductID=book_id).first()
+            if product:
+                # Check if stock is sufficient
+                if product.StockQuantity >= int(quantity):
+                    product.StockQuantity -= int(quantity)
+                else:
+                    # Handle case where stock is insufficient
+                    flash(f'Not enough stock for product: {product.ProductName}', 'danger')
+                    return redirect(url_for('offlineservices'))
+            else:
+                # Handle case where the product is not found
+                return f"Book with ID '{book_id}' not found.", 400
+
+        db.session.commit()
+        return redirect(url_for('offlineservices'))
+
+    # Retrieve the number of book fields to display
+    book_count = int(request.args.get('book_count', 1))
+    
+    return render_template('offlineservices.html', products=products, category_map=category_map, book_count=book_count)
+
 
 @app.route('/remove/<int:product_id>', methods=['POST'])
 def remove_product(product_id):
@@ -735,6 +775,13 @@ def cash_payment():
     cart = Carts.query.filter_by(UserID=user_id).first()
     cart_items = CartItems.query.filter_by(CartID=cart.CartID).all()
     
+    # Check stock availability
+    for item in cart_items:
+        product = Products.query.filter_by(ProductID=item.ProductID).first()
+        if product.StockQuantity < item.Quantity:
+            flash(f'Not enough stock for product: {product.ProductName}', 'danger')
+            return redirect(url_for('mycart'))
+
     total_amount = sum(item.Quantity * item.product.Price for item in cart_items)
     
     address = Addresses.query.filter_by(UserID=user_id).first()
@@ -747,7 +794,7 @@ def cash_payment():
         TotalAmount=total_amount,
         ShippingAddressID=shipping_address_id,
         BillingAddressID=billing_address_id,
-        OrderStatus='Completed'  
+        OrderStatus='Completed'
     )
     db.session.add(order)
     db.session.commit()
@@ -760,6 +807,11 @@ def cash_payment():
             UnitPrice=item.product.Price
         )
         db.session.add(order_item)
+        
+        # Update stock quantity
+        product.StockQuantity -= item.Quantity
+        db.session.add(product)
+        
     db.session.commit()
 
     payment = Payments(
@@ -778,6 +830,7 @@ def cash_payment():
     return redirect(url_for('order_confirmation', order_id=order.OrderID))
 
 
+
 @app.route('/online_payment', methods=['GET', 'POST'])
 def online_payment():
     if 'user_id' not in session:
@@ -793,6 +846,14 @@ def online_payment():
         
         cart = Carts.query.filter_by(UserID=user_id).first()
         cart_items = CartItems.query.filter_by(CartID=cart.CartID).all()
+        
+        # Check stock availability
+        for item in cart_items:
+            product = Products.query.filter_by(ProductID=item.ProductID).first()
+            if product.StockQuantity < item.Quantity:
+                flash(f'Not enough stock for product: {product.ProductName}', 'danger')
+                return redirect(url_for('mycart'))
+
         total_amount = sum(item.Quantity * item.product.Price for item in cart_items)
         
         address = Addresses.query.filter_by(UserID=user_id).first()
@@ -818,6 +879,12 @@ def online_payment():
                 UnitPrice=item.product.Price
             )
             db.session.add(order_item)
+            
+            # Update stock quantity
+            product = Products.query.filter_by(ProductID=item.ProductID).first()
+            product.StockQuantity -= item.Quantity
+            db.session.add(product)
+        
         db.session.commit()
 
         payment = Payments(
@@ -836,6 +903,7 @@ def online_payment():
         return redirect(url_for('order_confirmation', order_id=order.OrderID))
 
     return render_template('online_payment.html')
+
 
 @app.route('/order_confirmation/<int:order_id>')
 def order_confirmation(order_id):
