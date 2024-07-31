@@ -1,5 +1,4 @@
-from flask import Flask, session, redirect, url_for, request, flash, render_template
-from flask import Flask, session, redirect, url_for, request, flash, render_template
+from flask import Flask, session, redirect, url_for, request, flash, render_template,jsonify
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
@@ -10,6 +9,8 @@ from datetime import datetime, timedelta
 # from flask_login import current_user
 import re
 import os
+import speech_recognition as sr
+from gtts import gTTS
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///bookshop.db'
@@ -257,14 +258,19 @@ def signin():
     # return render_template('signin.html', allusers=allusers)
     return render_template('signin.html')
 
+def get_low_stock_products(user_id):
+    threshold = 50
+    return Products.query.filter_by(MerchantID=user_id).filter(Products.StockQuantity < threshold).all()
+
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('login'))
         
     user = User.query.get(session['user_id'])
+    low_stock_products = get_low_stock_products(user.UserID) if user.UserType == 'merchant' else []
     products = Products.query.filter_by(MerchantID=user.UserID).all()
-    return render_template('dashboard.html', user=user, products= products)
+    return render_template('dashboard.html', user=user, products= products,low_stock_products=low_stock_products)
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
 def edit_profile():
@@ -323,14 +329,12 @@ def update(product_id):
         author = request.form['author']
         bookdesc = request.form['desc']
         bookprice = request.form['price']
-        stockamount = request.form['amount']
         categoryid = request.form['categoryid']
         
         product.ProductName = bookname
         product.Author = author
         product.Description = bookdesc
         product.Price = bookprice
-        product.StockQuantity = stockamount
         product.CategoryID = categoryid
 
         if 'bookimage' in request.files:
@@ -865,6 +869,87 @@ def privacy_policy():
 @app.route('/terms-of-service')
 def terms_of_service():
     return render_template('terms_and_conditions.html')
+
+@app.route('/book/<int:product_id>')
+def book_restock(product_id):
+    product = Products.query.get_or_404(product_id)
+    return render_template('book_restock.html', product=product)
+
+@app.route('/update_stock/<int:product_id>', methods=['POST'])
+def update_stock(product_id):
+    product = Products.query.get_or_404(product_id)
+    if 'stock' in request.form:
+        try:
+            stock = int(request.form['stock'])
+            product.StockQuantity += stock
+            db.session.commit()
+            flash('Stock updated successfully!', 'success')
+        except ValueError:
+            flash('Invalid stock value', 'danger')
+    return redirect(url_for('book_restock', product_id=product_id))
+
+@app.route('/dashboard/transaction_history')
+def transaction_history():
+    merchant_id = session['user_id']
+    # Fetch all products for the current merchant
+    products = Products.query.filter_by(MerchantID=merchant_id).all()
+    
+    transaction_data = []
+    total_profit = 0
+
+    for product in products:
+        # Fetch all order items for the current product
+        order_items = OrderItems.query.filter_by(ProductID=product.ProductID).all()
+        
+        total_quantity = sum(item.Quantity for item in order_items)
+        product_profit = sum(item.Quantity * item.UnitPrice for item in order_items)
+        total_profit += product_profit
+
+        transaction_data.append({
+            'ProductName': product.ProductName,
+            'TotalQuantity': total_quantity,
+            'TotalProfit': product_profit
+        })
+
+    return render_template('transaction_history.html', transaction_data=transaction_data, total_profit=total_profit)
+
+@app.route('/voice_to_text', methods=['GET', 'POST'])
+def voice_to_text():
+    return render_template('voice_to_text.html')
+
+@app.route('/text_to_voice', methods=['GET', 'POST'])
+def text_to_voice():
+    audio_url = None
+    if request.method == 'POST':
+        text = request.form.get('text')
+        if text:
+            tts = gTTS(text=text, lang='en')
+            filename = 'output.mp3'
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            tts.save(file_path)
+            audio_url = url_for('static', filename='uploads/' + filename)
+
+    return render_template('text_to_voice.html', audio_url=audio_url)
+
+@app.route('/process_audio', methods=['POST'])
+def process_audio():
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        recognizer.adjust_for_ambient_noise(source)
+        audio = recognizer.listen(source)
+        print("Recognizing...")
+        try:
+            text = recognizer.recognize_google(audio)
+            print("You said:", text)
+            return text
+        except sr.UnknownValueError:
+            print("Sorry, I couldn't understand what you said.")
+            return "Sorry, I couldn't understand what you said."
+        except sr.RequestError as e:
+            print(f"Could not request results from Google Speech Recognition service; {e}")
+            return f"Could not request results from Google Speech Recognition service; {e}"
+
 
 if __name__ == '__main__':
 
