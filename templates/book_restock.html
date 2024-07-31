@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class="container">
+    <h1>Book Details</h1>
+    <div class="card mb-4 my-3 rounded">
+        <div class="row g-0">
+            <div class="col-md-4">
+                <img src="{{ url_for('static', filename='uploads/' ~ product.ProductImage) }}" class="img-fluid rounded-start" alt="{{ product.ProductName }}">
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title"><strong>BookID: </strong> {{ product.ProductID }}</h5>
+                    <h5 class="card-title"><strong>Title: </strong> {{ product.ProductName }}</h5>
+                    <p class="card-title"><strong>Author: </strong> {{ product.Author }}</p>
+                    <p class="card-text"><strong>Description: </strong> {{ product.Description }}</p>
+                    <p class="card-text"><strong>Genre: </strong> {{ product.CategoryID }}</p>
+                    <p class="card-text"><strong>Price: </strong>Rs.{{ product.Price }}</p>
+                    <p class="card-text"><strong>Current Stock: </strong> {{ product.StockQuantity }}</p>
+                    
+                    <form action="{{ url_for('update_stock', product_id=product.ProductID) }}" method="post">
+                        <div class="mb-3">
+                            <label for="stock" class="form-label"><strong>Add Stock: </strong></label>
+                            <input type="number" class="form-control" id="stock" name="stock" min="1" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Stock</button>
+                    </form>
+                    
+                    <a href="{{ url_for('my_books') }}" class="btn btn-secondary mt-3">Back to List</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

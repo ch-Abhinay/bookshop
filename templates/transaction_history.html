@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block body %}
+<div class="container mt-5">
+    <h3>Transaction History</h3>
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Book Name</th>
+                        <th>Total Quantity Sold</th>
+                        <th>Profit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in transaction_data %}
+                    <tr>
+                        <td>{{ data.ProductName }}</td>
+                        <td>{{ data.TotalQuantity }}</td>
+                        <td>Rs. {{ data.TotalProfit }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="2"><strong>Total Profit</strong></td>
+                        <td><strong>Rs. {{ total_profit }}</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

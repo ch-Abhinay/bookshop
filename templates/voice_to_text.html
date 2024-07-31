@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block body %}
+<h1>Voice to Text</h1>
+<button class="btn btn-primary" onclick="startRecording()">Start Recording</button>
+<button class="btn btn-primary" onclick="stopRecording()" id="stopButton" disabled>Stop Recording</button>
+<div id="result"></div>
+<div id="timer">Time: 0 seconds</div>
+
+<script>
+    let startTime;
+    let timerInterval;
+
+    function startRecording() {
+        var resultDiv = document.getElementById('result');
+        var stopButton = document.getElementById('stopButton');
+        resultDiv.innerHTML = 'Listening...';
+        stopButton.disabled = false;
+
+        startTime = Date.now();
+
+        fetch('/process_audio', {
+            method: 'POST'
+        })
+            .then(response => response.text())
+            .then(data => {
+                stopButton.disabled = true;
+                resultDiv.innerHTML = data;
+                clearInterval(timerInterval);
+            });
+
+        timerInterval = setInterval(() => {
+            const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+            document.getElementById('timer').innerText = `Time: ${elapsedTime} seconds`;
+        }, 1000);
+    }
+
+    function stopRecording() {
+        clearInterval(timerInterval);
+        document.getElementById('result').innerHTML = 'Recording stopped.';
+        document.getElementById('stopButton').disabled = true;
+    }
+</script>
+{% endblock %}

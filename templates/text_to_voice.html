@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block body %}
+<h1>Text to Voice</h1>
+<form method="POST">
+    <div class="form-group">
+        <label for="text">Enter text:</label>
+        <textarea class="form-control" id="text" name="text" rows="3" required></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Convert to Voice</button>
+</form>
+
+{% if audio_url %}
+<div class="mt-3">
+    <h2>Generated Audio:</h2>
+    <audio controls>
+        <source src="{{ audio_url }}" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+</div>
+{% endif %}
+{% endblock %}
+
