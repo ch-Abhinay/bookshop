@@ -46,7 +46,7 @@ class Addresses(db.Model):
     State= db.Column(db.String(30), nullable=False)
     PostalCode= db.Column(db.String(10), nullable=False)
     Country= db.Column (db.String(50), nullable=False)
-
+#commented
 class Products(db.Model):
     __tablename__ = 'products'
     ProductID = db.Column(db.Integer, primary_key=True)
